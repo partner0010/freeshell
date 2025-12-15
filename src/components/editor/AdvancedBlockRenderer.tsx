@@ -283,7 +283,7 @@ export function ProcessBlock({ content }: { content: ProcessBlockContent }) {
 }
 
 // 아코디언 블록
-export function AccordionBlock({ content }: { content: AccordionBlockContent }) {
+export const AccordionBlock = ({ content }: { content: AccordionBlockContent }) => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
   
   return (
@@ -333,7 +333,7 @@ export function AccordionBlock({ content }: { content: AccordionBlockContent }) 
       </div>
     </div>
   );
-}
+};
 
 // 배너 블록
 export function BannerBlock({ content }: { content: BannerBlockContent }) {

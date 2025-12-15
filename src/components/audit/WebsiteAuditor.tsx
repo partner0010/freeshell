@@ -30,7 +30,7 @@ import {
   type Recommendation,
 } from '@/lib/audit/comprehensive-auditor';
 
-export function WebsiteAuditor() {
+export const WebsiteAuditor = () => {
   const [url, setUrl] = useState('');
   const [isAuditing, setIsAuditing] = useState(false);
   const [auditResult, setAuditResult] = useState<WebsiteAuditResult | null>(null);
@@ -104,7 +104,7 @@ export function WebsiteAuditor() {
     { id: 'accessibility', label: '접근성', icon: Accessibility },
     { id: 'codeQuality', label: '코드 품질', icon: Code2 },
     { id: 'bestPractices', label: '베스트 프랙티스', icon: CheckCircle2 },
-  ] as const;
+  ];
 
   return (
     <div className="h-full flex flex-col bg-white">
@@ -511,5 +511,5 @@ export function WebsiteAuditor() {
       )}
     </div>
   );
-}
+};
 
