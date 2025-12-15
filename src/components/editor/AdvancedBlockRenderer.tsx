@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import type { JSX } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import * as Icons from 'lucide-react';
 import type {
@@ -284,7 +283,7 @@ export function ProcessBlock({ content }: { content: ProcessBlockContent }) {
 }
 
 // 아코디언 블록
-export function AccordionBlock({ content }: { content: AccordionBlockContent }): JSX.Element {
+export function AccordionBlock({ content }: { content: AccordionBlockContent }) {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
   
   return (

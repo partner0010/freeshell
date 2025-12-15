@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import type { JSX } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Shield,
@@ -31,7 +30,7 @@ import {
   type Recommendation,
 } from '@/lib/audit/comprehensive-auditor';
 
-export function WebsiteAuditor(): JSX.Element {
+export function WebsiteAuditor() {
   const [url, setUrl] = useState('');
   const [isAuditing, setIsAuditing] = useState(false);
   const [auditResult, setAuditResult] = useState<WebsiteAuditResult | null>(null);
