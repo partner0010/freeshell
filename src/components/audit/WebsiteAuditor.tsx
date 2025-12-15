@@ -105,7 +105,6 @@ export function WebsiteAuditor() {
     { id: 'codeQuality', label: '코드 품질', icon: Code2 },
     { id: 'bestPractices', label: '베스트 프랙티스', icon: CheckCircle2 },
   ];
-
   return (
     <div className="h-full flex flex-col bg-white">
       {/* 헤더 */}
