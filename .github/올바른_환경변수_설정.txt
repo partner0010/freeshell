@@ -18,11 +18,11 @@
 📋 환경 변수 5개 모두 동일하게 설정:
 
 1. GOOGLE_CLIENT_ID
-   - Value: 509430067814-j45fngh5kud1fdequ08g8e7mjf8p7oqt.apps.googleusercontent.com
+   - Value: [Google Cloud Console에서 복사한 클라이언트 ID]
    - Environment: 공통 설정 사용
 
 2. GOOGLE_CLIENT_SECRET
-   - Value: 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
+   - Value: [Google Cloud Console에서 복사한 보안 비밀번호]
    - Environment: 공통 설정 사용
 
 3. NEXTAUTH_SECRET

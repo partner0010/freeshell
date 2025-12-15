@@ -39,7 +39,7 @@
 
 1. "Add Another" 버튼 클릭
 2. Key 입력: GOOGLE_CLIENT_SECRET
-3. Value 입력: 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
+3. Value 입력: [Google Cloud Console에서 복사한 보안 비밀번호]
 4. Environments 드롭다운 클릭
 5. ✅ Production, ✅ Preview, ✅ Development 모두 체크
 

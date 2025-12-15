@@ -9,10 +9,10 @@
 📋 생성된 정보:
 
 클라이언트 ID:
-509430067814-j45fngh5kud1fdequ08g8e7mjf8p7oqt.apps.googleusercontent.com
+[Google Cloud Console에서 복사한 클라이언트 ID]
 
 클라이언트 보안 비밀번호:
-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
+[Google Cloud Console에서 복사한 보안 비밀번호]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -22,11 +22,11 @@ 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
 
 1. 클라이언트 ID 옆의 복사 아이콘 클릭
    - 또는 직접 선택해서 복사
-   - 값: 509430067814-j45fngh5kud1fdequ08g8e7mjf8p7oqt.apps.googleusercontent.com
+   - 값: [Google Cloud Console에서 복사한 클라이언트 ID]
 
 2. 클라이언트 보안 비밀번호 옆의 복사 아이콘 클릭
    - 또는 직접 선택해서 복사
-   - 값: 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
+   - 값: [Google Cloud Console에서 복사한 보안 비밀번호]
 
 3. 메모장에 저장해두세요!
 
@@ -44,7 +44,7 @@ Vercel 프로젝트 설정 페이지로 돌아가서:
 변수 1: GOOGLE_CLIENT_ID
 
 - Name: GOOGLE_CLIENT_ID
-- Value: 509430067814-j45fngh5kud1fdequ08g8e7mjf8p7oqt.apps.googleusercontent.com
+- Value: [Google Cloud Console에서 복사한 클라이언트 ID]
 - Environment: ✅ Production, ✅ Preview, ✅ Development 모두 체크
 - Save 클릭
 
@@ -53,7 +53,7 @@ Vercel 프로젝트 설정 페이지로 돌아가서:
 변수 2: GOOGLE_CLIENT_SECRET
 
 - Name: GOOGLE_CLIENT_SECRET
-- Value: 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
+- Value: [Google Cloud Console에서 복사한 보안 비밀번호]
 - Environment: ✅ Production, ✅ Preview, ✅ Development 모두 체크
 - Save 클릭
 
