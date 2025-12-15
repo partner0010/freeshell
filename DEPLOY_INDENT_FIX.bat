@@ -3,7 +3,7 @@ chcp 65001 >nul
 cd /d "%~dp0"
 
 echo ========================================
-echo tsconfig.json jsx 설정 변경 배포
+echo 들여쓰기 수정 배포
 echo ========================================
 echo.
 
@@ -16,7 +16,7 @@ git add -A
 
 echo.
 echo [3/4] 변경사항 커밋...
-git commit -m "fix: tsconfig.json jsx를 react-jsx로 변경"
+git commit -m "fix: AdvancedBlockRenderer 들여쓰기 수정"
 
 echo.
 echo [4/4] GitHub에 푸시...

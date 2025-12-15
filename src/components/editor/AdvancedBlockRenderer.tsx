@@ -298,7 +298,7 @@ export function AccordionBlock({ content }: { content: AccordionBlockContent }):
             ? { title: item.question, content: item.answer } 
             : item as AccordionItem;
           return (
-          <motion.div
+            <motion.div
             key={i}
             className="bg-white rounded-xl overflow-hidden shadow-card"
           >
