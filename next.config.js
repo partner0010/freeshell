@@ -61,6 +61,12 @@ const nextConfig = {
   // React strict mode
   reactStrictMode: true,
 
+  // SWC 컴파일러 설정
+  swcMinify: true,
+  compiler: {
+    reactRemoveProperties: false,
+  },
+
   // 헤더 최적화
   async headers() {
     return [

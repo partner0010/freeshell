@@ -3,7 +3,7 @@ chcp 65001 >nul
 cd /d "%~dp0"
 
 echo ========================================
-echo JSX 오류 수정 및 배포
+echo 최종 수정 및 배포
 echo ========================================
 echo.
 
@@ -16,7 +16,7 @@ git add -A
 
 echo.
 echo [3/4] 변경사항 커밋...
-git commit -m "fix: tsconfig.json jsx 설정을 react-jsx로 변경"
+git commit -m "fix: next.config.js SWC 컴파일러 설정 추가"
 
 echo.
 echo [4/4] GitHub에 푸시...
@@ -28,3 +28,4 @@ echo 완료!
 echo 이번에는 반드시 성공합니다!
 echo ========================================
 pause
+
