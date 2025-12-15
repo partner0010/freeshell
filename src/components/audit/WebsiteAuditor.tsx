@@ -96,7 +96,7 @@ export function WebsiteAuditor() {
     }
   };
 
-  const categories = [
+  const categories: Array<{ id: string; label: string; icon: any }> = [
     { id: 'overall', label: '전체', icon: TrendingUp },
     { id: 'security', label: '보안', icon: Shield },
     { id: 'performance', label: '성능', icon: Zap },
