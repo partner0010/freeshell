@@ -28,6 +28,7 @@ import {
   Hash,
 } from 'lucide-react';
 import { useEditorStore } from '@/store/editor-store';
+import { generateUUID } from '@/utils/uuid';
 
 interface CommandItem {
   id: string;
@@ -49,11 +50,11 @@ export default function CommandPalette() {
   // 명령어 목록
   const commands: CommandItem[] = [
     // 블록 추가
-    { id: 'add-header', label: '헤더 블록 추가', icon: Layout, category: '블록 추가', action: () => addBlock({ type: 'header', content: {}, styles: {} }), shortcut: '' },
-    { id: 'add-hero', label: '히어로 블록 추가', icon: Box, category: '블록 추가', action: () => addBlock({ type: 'hero', content: {}, styles: {} }), shortcut: '' },
-    { id: 'add-text', label: '텍스트 블록 추가', icon: Type, category: '블록 추가', action: () => addBlock({ type: 'text', content: {}, styles: {} }), shortcut: '' },
-    { id: 'add-image', label: '이미지 블록 추가', icon: Image, category: '블록 추가', action: () => addBlock({ type: 'image', content: {}, styles: {} }), shortcut: '' },
-    { id: 'add-features', label: '기능 블록 추가', icon: Zap, category: '블록 추가', action: () => addBlock({ type: 'features', content: {}, styles: {} }), shortcut: '' },
+    { id: 'add-header', label: '헤더 블록 추가', icon: Layout, category: '블록 추가', action: () => addBlock({ id: generateUUID(), type: 'header', content: {}, styles: {} }), shortcut: '' },
+    { id: 'add-hero', label: '히어로 블록 추가', icon: Box, category: '블록 추가', action: () => addBlock({ id: generateUUID(), type: 'hero', content: {}, styles: {} }), shortcut: '' },
+    { id: 'add-text', label: '텍스트 블록 추가', icon: Type, category: '블록 추가', action: () => addBlock({ id: generateUUID(), type: 'text', content: {}, styles: {} }), shortcut: '' },
+    { id: 'add-image', label: '이미지 블록 추가', icon: Image, category: '블록 추가', action: () => addBlock({ id: generateUUID(), type: 'image', content: {}, styles: {} }), shortcut: '' },
+    { id: 'add-features', label: '기능 블록 추가', icon: Zap, category: '블록 추가', action: () => addBlock({ id: generateUUID(), type: 'features', content: {}, styles: {} }), shortcut: '' },
     
     // 편집
     { id: 'undo', label: '실행 취소', icon: Undo, category: '편집', action: undo, shortcut: 'Ctrl+Z' },
