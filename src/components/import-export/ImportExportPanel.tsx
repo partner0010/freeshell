@@ -126,10 +126,10 @@ export function ImportExportPanel() {
                       className="hidden"
                       id="file-import"
                     />
-                    <label htmlFor="file-import">
-                      <Button variant="primary" as="span">
+                    <label htmlFor="file-import" className="cursor-pointer">
+                      <span className="inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500 px-4 py-2 text-base">
                         파일 선택
-                      </Button>
+                      </span>
                     </label>
                   </div>
 
