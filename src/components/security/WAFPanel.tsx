@@ -15,6 +15,7 @@ import {
   wafSystem,
   type WAFRequest,
   type WAFRule,
+  type WAFResponse,
 } from '@/lib/security/waf';
 
 export function WAFPanel() {
@@ -25,7 +26,7 @@ export function WAFPanel() {
     path: '/api/users',
     userAgent: 'Mozilla/5.0...',
   });
-  const [testResult, setTestResult] = useState<ReturnType<typeof wafSystem.inspectRequest> | null>(null);
+  const [testResult, setTestResult] = useState<WAFResponse | null>(null);
   const [isTesting, setIsTesting] = useState(false);
 
   const handleTest = async () => {
