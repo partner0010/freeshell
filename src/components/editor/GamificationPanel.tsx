@@ -22,7 +22,7 @@ interface Achievement {
   id: string;
   name: string;
   description: string;
-  icon: React.ComponentType<{ size?: number; className?: string }>;
+  icon: React.ComponentType<any>;
   progress: number;
   total: number;
   unlocked: boolean;
