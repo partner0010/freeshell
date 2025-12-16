@@ -33,7 +33,7 @@ const chatMessages = [
   { id: 3, user: '이영희', message: '네 그게 좋겠어요 👍', time: '14:34' },
 ];
 
-const roleLabels: Record<string, { label: string; icon: React.ComponentType<{ size?: number; className?: string }> }> = {
+const roleLabels: Record<string, { label: string; icon: React.ComponentType<any> }> = {
   owner: { label: '소유자', icon: Crown },
   editor: { label: '편집자', icon: Edit3 },
   viewer: { label: '뷰어', icon: Eye },
