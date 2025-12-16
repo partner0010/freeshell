@@ -37,7 +37,7 @@ const paymentsData = [
   { id: 4, user: '최현우', amount: 29000, plan: 'Pro', date: '2024-03-01', status: 'failed', method: 'card' },
 ];
 
-const planIcons: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
+const planIcons: Record<string, React.ComponentType<any>> = {
   Free: Users,
   Pro: Zap,
   Enterprise: Building,

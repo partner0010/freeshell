@@ -26,7 +26,8 @@ git commit -m "fix: 빌드 오류 수정
 - Badge 컴포넌트에 outline variant 추가
 - optimizer.ts와 penetration-testing.ts에서 module 변수명 변경
 - component-optimizer.ts를 .tsx로 변경하여 JSX 파싱 오류 해결
-- 여러 파일에서 따옴표 이스케이프 오류 수정"
+- 여러 파일에서 따옴표 이스케이프 오류 수정
+- billing/page.tsx에서 planIcons 타입 오류 수정"
 echo.
 
 echo [4/4] 푸시...
