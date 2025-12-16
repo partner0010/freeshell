@@ -9,3 +9,14 @@ export function uuidv4(): string {
   });
 }
 
+/**
+ * UUID 생성 함수 (generateUUID는 uuidv4의 별칭)
+ */
+export function generateUUID(): string {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback for environments where crypto.randomUUID is not available
+  return uuidv4();
+}
+
