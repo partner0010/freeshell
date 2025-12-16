@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-interface BadgeProps {
+interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   children: React.ReactNode;
   variant?: 'default' | 'primary' | 'success' | 'warning' | 'error' | 'info' | 'outline';
   size?: 'sm' | 'md' | 'lg';
@@ -18,6 +18,7 @@ export function Badge({
   rounded = false,
   dot = false,
   className = '',
+  ...props
 }: BadgeProps) {
   const variantClasses = {
     default: 'bg-gray-100 text-gray-800',
@@ -44,6 +45,7 @@ export function Badge({
         ${rounded ? 'rounded-full' : 'rounded'}
         ${className}
       `}
+      {...props}
     >
       {dot && <span className="w-1.5 h-1.5 rounded-full bg-current" />}
       {children}
