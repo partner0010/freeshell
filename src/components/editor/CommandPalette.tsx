@@ -33,7 +33,7 @@ interface CommandItem {
   id: string;
   label: string;
   description?: string;
-  icon: React.ComponentType<{ size?: number; className?: string }>;
+  icon: React.ComponentType<any>;
   shortcut?: string;
   category: string;
   action: () => void;

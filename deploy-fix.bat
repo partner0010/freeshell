@@ -42,7 +42,8 @@ git commit -m "fix: 빌드 오류 수정
 - AutoSave.tsx에서 EditorState blocks, pages, styles 속성 오류 수정 (project에서 추출)
 - BlockRenderer.tsx에서 BlockContent 타입 오류 수정 (타입 단언 추가)
 - BlogCMSPanel.tsx에서 newPost status 타입 오류 수정 (타입 명시적 지정)
-- CollaborationPanel.tsx에서 Lucide 아이콘 타입 호환성 오류 수정"
+- CollaborationPanel.tsx에서 Lucide 아이콘 타입 호환성 오류 수정
+- CommandPalette.tsx에서 Lucide 아이콘 타입 호환성 오류 수정"
 echo.
 
 echo [4/4] 푸시...
