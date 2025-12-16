@@ -65,13 +65,13 @@ export default function FloatingToolbar() {
     {
       icon: ChevronUp,
       label: '위로 이동',
-      action: () => blockIndex > 0 && moveBlock(selectedBlockId, blockIndex - 1),
+      action: () => blockIndex > 0 && moveBlock(blockIndex, blockIndex - 1),
       disabled: blockIndex === 0,
     },
     {
       icon: ChevronDown,
       label: '아래로 이동',
-      action: () => blockIndex < blocks.length - 1 && moveBlock(selectedBlockId, blockIndex + 1),
+      action: () => blockIndex < blocks.length - 1 && moveBlock(blockIndex, blockIndex + 1),
       disabled: blockIndex === blocks.length - 1,
     },
     {

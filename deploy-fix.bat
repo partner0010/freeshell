@@ -48,7 +48,8 @@ git commit -m "fix: 빌드 오류 수정
 - uuid.ts에 generateUUID 함수 추가
 - EditorMinimap.tsx에서 EditorState blocks 속성 오류 수정 (project에서 추출)
 - ElectronicSignature.tsx에서 initialDocument content 타입 오류 수정 (undefined 체크 추가)
-- FloatingToolbar.tsx에서 EditorState blocks 속성 오류 수정 (project에서 추출)"
+- FloatingToolbar.tsx에서 EditorState blocks 속성 오류 수정 (project에서 추출)
+- FloatingToolbar.tsx에서 moveBlock 호출 시 타입 오류 수정 (인덱스 사용)"
 echo.
 
 echo [4/4] 푸시...
