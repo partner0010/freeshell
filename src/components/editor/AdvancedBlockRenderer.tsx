@@ -270,7 +270,7 @@ export function ProcessBlock({ content }: { content: ProcessBlockContent }) {
             className="relative text-center"
           >
             {/* 연결선 */}
-            {i < content.steps.length - 1 && (
+            {content.steps && i < content.steps.length - 1 && (
               <div className="hidden md:block absolute top-8 left-1/2 w-full h-0.5 bg-primary-200" />
             )}
             
