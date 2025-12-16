@@ -91,7 +91,7 @@ export const WebsiteAuditor = () => {
     }
   }
 
-  function handleSimulate(recommendation: Recommendation) {
+  const handleSimulate = (recommendation: Recommendation) => {
     if (!auditResult) return;
 
     const changes = [
@@ -104,7 +104,8 @@ export const WebsiteAuditor = () => {
     const simulated = simulateChanges(auditResult, changes);
     setSimulatedResult(simulated);
     setShowSimulation(true);
-  }
+  };
+
   return (
     <div className="h-full flex flex-col bg-white">
       {/* 헤더 */}
