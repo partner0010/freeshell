@@ -9,7 +9,11 @@ export default function EditorMinimap() {
   const [isExpanded, setIsExpanded] = useState(true);
   const [viewportPosition, setViewportPosition] = useState({ top: 0, height: 100 });
   const minimapRef = useRef<HTMLDivElement>(null);
-  const { blocks } = useEditorStore();
+  const { project, getCurrentPage } = useEditorStore();
+  
+  // project에서 현재 페이지의 blocks 추출
+  const currentPage = getCurrentPage();
+  const blocks = currentPage?.blocks || [];
 
   // 뷰포트 위치 추적
   useEffect(() => {
