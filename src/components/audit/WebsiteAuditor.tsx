@@ -12,7 +12,6 @@ import {
   AlertTriangle,
   TrendingUp,
   RefreshCw,
-  Download,
   Play,
   Eye,
   Sparkles,
@@ -70,7 +69,7 @@ export const WebsiteAuditor = () => {
   const [simulatedResult, setSimulatedResult] = useState<WebsiteAuditResult | null>(null);
   const [aiRecommendations, setAiRecommendations] = useState<Recommendation[]>([]);
 
-  async function handleAudit() {
+  const handleAudit = async () => {
     if (!url.trim()) {
       alert('URL을 입력하세요');
       return;
@@ -80,8 +79,6 @@ export const WebsiteAuditor = () => {
     try {
       const result = await auditWebsite(url);
       setAuditResult(result);
-
-      // AI 권장사항 생성
       const aiRecs = await generateAIRecommendations(result);
       setAiRecommendations(aiRecs);
     } catch (error) {
@@ -89,18 +86,16 @@ export const WebsiteAuditor = () => {
     } finally {
       setIsAuditing(false);
     }
-  }
+  };
 
   const handleSimulate = (recommendation: Recommendation) => {
     if (!auditResult) return;
-
     const changes = [
       {
         type: recommendation.category,
         implementation: recommendation.code || recommendation.description,
       },
     ];
-
     const simulated = simulateChanges(auditResult, changes);
     setSimulatedResult(simulated);
     setShowSimulation(true);
@@ -108,7 +103,6 @@ export const WebsiteAuditor = () => {
 
   return (
     <div className="h-full flex flex-col bg-white">
-      {/* 헤더 */}
       <div className="p-6 border-b">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
@@ -124,7 +118,6 @@ export const WebsiteAuditor = () => {
           </div>
         </div>
 
-        {/* URL 입력 */}
         <div className="flex items-center gap-3">
           <input
             type="text"
@@ -154,10 +147,8 @@ export const WebsiteAuditor = () => {
         </div>
       </div>
 
-      {/* 결과 */}
       {auditResult && (
         <div className="flex-1 overflow-auto">
-          {/* 전체 점수 */}
           <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-b">
             <div className="flex items-center justify-between">
               <div>
@@ -180,7 +171,6 @@ export const WebsiteAuditor = () => {
             </div>
           </div>
 
-          {/* 카테고리 탭 */}
           <div className="p-6 border-b">
             <div className="flex items-center gap-2 overflow-x-auto pb-2">
               {categories.map((cat) => {
@@ -208,9 +198,7 @@ export const WebsiteAuditor = () => {
             </div>
           </div>
 
-          {/* 상세 내용 */}
           <div className="p-6 space-y-6">
-            {/* 이슈 목록 */}
             {selectedCategory !== 'overall' && (
               <section>
                 <h3 className="text-lg font-bold text-gray-800 mb-4">발견된 이슈</h3>
@@ -246,7 +234,6 @@ export const WebsiteAuditor = () => {
               </section>
             )}
 
-            {/* 취약점 */}
             {auditResult.vulnerabilities.length > 0 && (
               <section>
                 <h3 className="text-lg font-bold text-red-700 mb-4 flex items-center gap-2">
@@ -283,7 +270,6 @@ export const WebsiteAuditor = () => {
               </section>
             )}
 
-            {/* AI 권장사항 */}
             {aiRecommendations.length > 0 && (
               <section>
                 <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
@@ -335,7 +321,6 @@ export const WebsiteAuditor = () => {
               </section>
             )}
 
-            {/* 멀웨어 스캔 결과 */}
             {auditResult.malwareScan && (
               <section>
                 <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
@@ -368,7 +353,6 @@ export const WebsiteAuditor = () => {
               </section>
             )}
 
-            {/* 서버 보안 */}
             {auditResult.serverSecurity && (
               <section>
                 <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
@@ -409,7 +393,6 @@ export const WebsiteAuditor = () => {
         </div>
       )}
 
-      {/* 시뮬레이션 모달 */}
       <AnimatePresence>
         {showSimulation && simulatedResult && (
           <motion.div
@@ -497,7 +480,6 @@ export const WebsiteAuditor = () => {
         )}
       </AnimatePresence>
 
-      {/* 빈 상태 */}
       {!auditResult && !isAuditing && (
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
@@ -512,4 +494,3 @@ export const WebsiteAuditor = () => {
     </div>
   );
 };
-
