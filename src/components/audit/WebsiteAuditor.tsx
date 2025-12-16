@@ -105,7 +105,6 @@ export const WebsiteAuditor = () => {
     setSimulatedResult(simulated);
     setShowSimulation(true);
   }
-
   return (
     <div className="h-full flex flex-col bg-white">
       {/* 헤더 */}
