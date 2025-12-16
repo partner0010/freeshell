@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { Block, Page, Project, GlobalStyles } from '@/types';
-import { v4 as uuidv4 } from 'uuid';
+import { uuidv4 } from '@/utils/uuid';
 
 interface EditorState {
   // 프로젝트 상태

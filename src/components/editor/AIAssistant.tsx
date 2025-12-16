@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Sparkles, Lightbulb, Wand2, Code, Layout, Palette, Loader2 } from 'lucide-react';
 import { useEditorStore } from '@/store/editor-store';
 import { Block } from '@/types';
-import { v4 as uuidv4 } from 'uuid';
+import { uuidv4 } from '@/utils/uuid';
 import { blockTemplates } from '@/data/block-templates';
 
 const quickPrompts = [

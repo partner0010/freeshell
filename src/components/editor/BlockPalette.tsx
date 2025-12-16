@@ -14,7 +14,7 @@ const getBlocksByCategory = (category: string) => {
 };
 import { useEditorStore } from '@/store/editor-store';
 import { Block, BlockTemplate } from '@/types';
-import { v4 as uuidv4 } from 'uuid';
+import { uuidv4 } from '@/utils/uuid';
 
 const categories = [
   { id: 'layout', name: '레이아웃', icon: 'Layout' },
