@@ -113,7 +113,7 @@ export function TimelineBlock({ content }: { content: TimelineBlockContent }) {
 
 // 소셜 미디어 블록
 export function SocialBlock({ content }: { content: SocialBlockContent }) {
-  const platformIcons: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
+  const platformIcons: Record<string, React.ComponentType<any>> = {
     instagram: Icons.Instagram,
     twitter: Icons.Twitter,
     youtube: Icons.Youtube,
