@@ -57,7 +57,8 @@ git commit -m "fix: 빌드 오류 수정
 - Sidebar.tsx에서 SidebarTab 타입 export 추가
 - OrganizedSidebar.tsx에서 SidebarTab import 오류 수정
 - advanced-optimization.ts에 advancedOptimizationSystem 객체 추가
-- .vercelignore 파일 생성으로 빌드 최적화"
+- .vercelignore 파일 생성으로 빌드 최적화
+- ScrollAnimations.tsx에서 ScrollAnimation 인터페이스에 rotateX, rotateY 속성 추가"
 echo.
 
 echo [4/4] 푸시...

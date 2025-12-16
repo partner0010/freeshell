@@ -30,6 +30,8 @@ interface ScrollAnimation {
     opacity?: number;
     scale?: number;
     rotate?: number;
+    rotateX?: number;
+    rotateY?: number;
   };
 }
 
