@@ -159,7 +159,7 @@ export function NewsletterBlock({ content }: { content: NewsletterBlockContent }
   return (
     <div className="max-w-2xl mx-auto text-center text-white">
       <h2 className="text-3xl font-display font-bold mb-4">{content.title}</h2>
-      <p className="text-white/80 mb-8">{content.subtitle}</p>
+      {content.description && <p className="text-white/80 mb-8">{content.description}</p>}
       <div className="flex gap-2">
         <input
           type="email"
