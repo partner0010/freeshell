@@ -214,7 +214,7 @@ export function renderSidebarPanel(activeTab: SidebarTab): React.ReactNode {
     case 'debugging':
       return <ComprehensiveDebugger />;
     case 'website-audit':
-      return <WebsiteAuditor />;
+      return <div>Website Auditor (Temporarily Disabled)</div>;
     case 'cicd':
       return <PipelinePanel />;
     case 'zero-trust':
