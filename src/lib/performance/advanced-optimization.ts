@@ -243,6 +243,16 @@ export interface OptimizationReport {
     requestReduction: number;
     score: number;
   };
+  before: {
+    size: number;
+    loadTime: number;
+    requests: number;
+  };
+  after: {
+    size: number;
+    loadTime: number;
+    requests: number;
+  };
   recommendations: string[];
 }
 
@@ -253,12 +263,29 @@ export const advancedOptimizationSystem = {
   analyzeBundle(): OptimizationReport {
     // 실제로는 웹팩 번들 분석 결과를 사용해야 하지만,
     // 여기서는 더미 데이터를 반환합니다.
+    const beforeSize = 2.5 * 1024 * 1024; // 2.5MB
+    const afterSize = beforeSize * 0.85; // 15% 감소
+    const beforeLoadTime = 2500; // 2.5초
+    const afterLoadTime = beforeLoadTime * 0.8; // 20% 감소
+    const beforeRequests = 40;
+    const afterRequests = beforeRequests * 0.75; // 25% 감소
+
     return {
       improvements: {
         sizeReduction: 15,
         timeReduction: 20,
         requestReduction: 25,
         score: 85,
+      },
+      before: {
+        size: beforeSize,
+        loadTime: beforeLoadTime,
+        requests: beforeRequests,
+      },
+      after: {
+        size: afterSize,
+        loadTime: afterLoadTime,
+        requests: afterRequests,
       },
       recommendations: [
         '이미지 최적화를 통해 15% 크기 감소 가능',
