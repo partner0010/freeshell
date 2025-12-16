@@ -172,7 +172,7 @@ export function Toolbar({ onOpenTemplates, viewport = 'desktop', onViewportChang
 }
 
 interface ToolbarButtonProps {
-  icon: React.ComponentType<{ size?: number; className?: string }>;
+  icon: React.ComponentType<any>;
   onClick?: () => void;
   disabled?: boolean;
   active?: boolean;

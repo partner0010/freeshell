@@ -59,7 +59,8 @@ git commit -m "fix: 빌드 오류 수정
 - advanced-optimization.ts에 advancedOptimizationSystem 객체 추가
 - .vercelignore 파일 생성으로 빌드 최적화
 - ScrollAnimations.tsx에서 ScrollAnimation 인터페이스에 rotateX, rotateY 속성 추가
-- Sidebar.tsx에서 Download, FileCode, Layout 아이콘 import 추가"
+- Sidebar.tsx에서 Download, FileCode, Layout 아이콘 import 추가
+- Toolbar.tsx에서 ToolbarButton의 icon prop 타입을 React.ComponentType<any>로 변경"
 echo.
 
 echo [4/4] 푸시...
