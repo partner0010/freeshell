@@ -30,6 +30,7 @@ export async function deriveKeyFromPassword(
 ): Promise<CryptoKey> {
   const encoder = new TextEncoder();
   const passwordBuffer = encoder.encode(password);
+  const saltBuffer: ArrayBuffer = salt.buffer.slice(0);
   
   const baseKey = await crypto.subtle.importKey(
     'raw',
@@ -42,7 +43,7 @@ export async function deriveKeyFromPassword(
   return await crypto.subtle.deriveKey(
     {
       name: 'PBKDF2',
-      salt, // Uint8Array is a BufferSource
+      salt: saltBuffer, // ensure ArrayBuffer (not SharedArrayBuffer)
       iterations: 100000,
       hash: 'SHA-256',
     },
