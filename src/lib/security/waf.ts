@@ -180,7 +180,7 @@ export class WAFSystem {
       case 'geo':
         if (rule.condition.startsWith('block:')) {
           const countries = rule.condition.replace('block:', '').split(',');
-          return request.country && countries.includes(request.country);
+          return Boolean(request.country && countries.includes(request.country));
         }
         return false;
 
