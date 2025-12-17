@@ -4,13 +4,22 @@
  */
 
 export type EventType = 
+  // 콘텐츠 파이프라인
+  | 'content.request'
+  | 'content.available'
   | 'content.created'
   | 'content.video.created'
   | 'content.image.created'
   | 'content.music.created'
+  | 'freeshell.content.created'
+  // 개발 파이프라인
+  | 'dev.request'
   | 'dev.code.generated'
+  | 'dev.website.created'
+  | 'dev.website.updated'
   | 'dev.website.deployed'
   | 'dev.security.audit'
+  // 에이전트 & 시스템
   | 'agent.task.completed'
   | 'agent.task.failed'
   | 'storage.file.uploaded'
