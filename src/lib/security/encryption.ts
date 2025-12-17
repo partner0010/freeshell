@@ -79,7 +79,7 @@ export async function encryptData(
   
   return {
     ciphertext: arrayBufferToBase64(ciphertext),
-    iv: arrayBufferToBase64(iv),
+    iv: arrayBufferToBase64(iv.buffer), // ensure ArrayBuffer
   };
 }
 
