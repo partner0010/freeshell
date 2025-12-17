@@ -64,7 +64,8 @@ export class CodeValidator {
       });
     }
 
-    if (code.includes('useState') && code.match(/useState/g)?.length > 10) {
+    const useStateCount = code.match(/useState/g)?.length ?? 0;
+    if (code.includes('useState') && useStateCount > 10) {
       warnings.push({
         line: 0,
         column: 0,
