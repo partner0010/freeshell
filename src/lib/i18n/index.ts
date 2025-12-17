@@ -182,17 +182,17 @@ class I18nManager {
 
   t(key: string, params?: Record<string, string>): string {
     const keys = key.split('.');
-    let value: string | Record<string, unknown> = translations[this.currentLocale];
+    let value: unknown = translations[this.currentLocale];
 
     for (const k of keys) {
-      if (value && typeof value === 'object' && k in value) {
-        value = value[k];
+      if (value && typeof value === 'object' && k in (value as Record<string, unknown>)) {
+        value = (value as Record<string, unknown>)[k];
       } else {
         // Fallback to Korean
         value = translations.ko;
         for (const fallbackKey of keys) {
-          if (value && typeof value === 'object' && fallbackKey in value) {
-            value = value[fallbackKey];
+          if (value && typeof value === 'object' && fallbackKey in (value as Record<string, unknown>)) {
+            value = (value as Record<string, unknown>)[fallbackKey];
           } else {
             return key;
           }
