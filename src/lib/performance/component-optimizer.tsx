@@ -10,7 +10,7 @@ import React from 'react';
  */
 export function memoized<T extends React.ComponentType<any>>(
   component: T,
-  propsAreEqual?: (prevProps: React.ComponentProps<T>, nextProps: React.ComponentProps<T>) => boolean
+  propsAreEqual?: (prevProps: Readonly<React.ComponentProps<T>>, nextProps: Readonly<React.ComponentProps<T>>) => boolean
 ): React.MemoExoticComponent<T> {
   return React.memo(component, propsAreEqual) as React.MemoExoticComponent<T>;
 }
