@@ -6,7 +6,7 @@
 export interface CodeAuditResult {
   file: string;
   line: number;
-  severity: 'critical' | 'high' | 'medium' | 'low';
+  severity: 'critical' | 'high' | 'medium' | 'low' | 'info';
   issue: string;
   description: string;
   recommendation: string;
@@ -145,6 +145,7 @@ export async function auditProject(
   high: number;
   medium: number;
   low: number;
+  info: number;
   results: CodeAuditResult[];
 }> {
   const allResults: CodeAuditResult[] = [];
@@ -160,6 +161,7 @@ export async function auditProject(
     high: allResults.filter((r) => r.severity === 'high').length,
     medium: allResults.filter((r) => r.severity === 'medium').length,
     low: allResults.filter((r) => r.severity === 'low').length,
+    info: allResults.filter((r) => r.severity === 'info').length,
     results: allResults,
   };
 
