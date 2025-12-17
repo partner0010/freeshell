@@ -311,11 +311,11 @@ export const advancedOptimizationSystem = {
     }
 
     if (options.criticalJS) {
-      const script = document.createElement('script');
-      script.rel = 'preload';
-      script.as = 'script';
-      script.href = '/critical.js';
-      document.head.appendChild(script);
+      const jsPreload = document.createElement('link');
+      jsPreload.rel = 'preload';
+      jsPreload.as = 'script';
+      jsPreload.href = '/critical.js';
+      document.head.appendChild(jsPreload);
     }
 
     if (options.fonts) {
