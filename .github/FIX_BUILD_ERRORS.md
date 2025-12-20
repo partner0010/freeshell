@@ -1,83 +1,84 @@
-# 빌드 오류 해결 가이드
+# 빌드 오류 수정 가이드
 
-## 현재 문제
+## 🔴 발견된 오류
 
-TypeScript가 다음 모듈을 찾지 못함:
-- `@/components/layout/GlobalHeader`
-- `@/lib/ai/agents`
-
-## 해결 방법
-
-### 1. 파일 존재 확인
-파일들이 실제로 존재하는지 확인:
-- ✅ `src/components/layout/GlobalHeader.tsx` - 존재함
-- ✅ `src/lib/ai/agents.ts` - 존재함
-
-### 2. TypeScript 서버 재시작
-VS Code/Cursor에서:
-1. `Ctrl+Shift+P` (또는 `Cmd+Shift+P`)
-2. "TypeScript: Restart TS Server" 실행
-
-### 3. 빌드 캐시 삭제
-```bash
-# .next 폴더 삭제
-rmdir /s /q .next
-
-# TypeScript 캐시 삭제
-rmdir /s /q node_modules\.cache
-
-# 재빌드
-npm run build
+### 1. next-auth 모듈 누락
+```
+Module not found: Can't resolve 'next-auth/react'
+Module not found: Can't resolve 'next-auth'
+Module not found: Can't resolve 'next-auth/providers/google'
 ```
 
-### 4. tsconfig.json 확인
-`tsconfig.json`이 프로젝트 루트에 있고, paths 설정이 올바른지 확인:
+### 2. bcryptjs 모듈 누락
+```
+Module not found: Can't resolve 'bcryptjs'
+```
+- 파일: `./src/app/api/auth/[...nextauth]/route.ts`
+- 파일: `./src/app/api/auth/signup/route.ts`
+
+### 3. JSX 구문 오류 (의심)
+- WebsiteAuditor.tsx
+- AdvancedBlockRenderer.tsx
+
+## ✅ 수정 방법
+
+### 1. 필수 의존성 설치
+
+프로젝트 루트에서 실행:
+```bash
+npm install next-auth@4 bcryptjs @types/bcryptjs
+```
+
+또는 package.json에 추가:
 ```json
 {
-  "compilerOptions": {
-    "paths": {
-      "@/*": ["./src/*"]
-    },
-    "baseUrl": "."
+  "dependencies": {
+    "next-auth": "^4.24.5",
+    "bcryptjs": "^2.4.3"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6"
   }
 }
 ```
 
-### 5. 실제 빌드 테스트
-TypeScript 오류는 있지만 실제 빌드는 성공할 수 있습니다:
+### 2. next.config.js 수정
+
+`experimental.serverActions` 옵션 제거:
+```js
+// next.config.js
+module.exports = {
+  // experimental.serverActions: true, // 이 줄 제거
+  // Server Actions는 기본적으로 활성화되어 있음
+};
+```
+
+### 3. 의존성 재설치
+
 ```bash
+rm -rf node_modules package-lock.json
+npm install
+```
+
+## 🚀 빠른 수정
+
+프로젝트 루트에서 다음 명령어 실행:
+
+```bash
+# 필수 의존성 설치
+npm install next-auth@4 bcryptjs @types/bcryptjs
+
+# 의존성 확인
+npm install
+
+# 빌드 테스트
 npm run build
 ```
 
-## 중요 사항
+## 📝 확인 사항
 
-**TypeScript 오류 ≠ 빌드 실패**
-
-- TypeScript는 개발 중 타입 체크를 위한 도구
-- Next.js는 실제 빌드 시 다른 방식으로 모듈을 해석
-- 실제 빌드가 성공하면 배포 가능
-
-## 확인 방법
-
-1. **로컬 빌드 테스트**
-   ```bash
-   npm run build
-   ```
-
-2. **개발 서버 실행**
-   ```bash
-   npm run dev
-   ```
-
-3. **Vercel 빌드 로그 확인**
-   - Vercel 대시보드 → Deployments → Build Logs
-
-## 빠른 해결
-
-가장 빠른 방법:
-1. `.next` 폴더 삭제
-2. `npm run build` 실행
-3. 빌드 성공 여부 확인
-
-빌드가 성공하면 TypeScript 오류는 무시해도 됩니다.
-
+1. ✅ next-auth가 package.json에 있는지 확인
+2. ✅ bcryptjs가 package.json에 있는지 확인
+3. ✅ node_modules에 next-auth와 bcryptjs가 설치되어 있는지 확인
+4. ✅ next.config.js에서 experimental.serverActions 제거
+5. ✅ 빌드 테스트 실행
