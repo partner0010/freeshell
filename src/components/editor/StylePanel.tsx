@@ -44,7 +44,7 @@ export function StylePanel() {
 
   if (!selectedBlock) {
     return (
-      <div className="h-full flex flex-col">
+      <div className="h-full flex flex-col min-h-[500px]">
         <GlobalStylesPanel />
       </div>
     );

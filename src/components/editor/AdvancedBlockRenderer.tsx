@@ -155,23 +155,70 @@ export function SocialBlock({ content }: { content: SocialBlockContent }) {
 // 뉴스레터 블록
 export function NewsletterBlock({ content }: { content: NewsletterBlockContent }) {
   const [email, setEmail] = useState('');
+  const [isSubscribing, setIsSubscribing] = useState(false);
+  const [subscribed, setSubscribed] = useState(false);
+
+  const handleSubscribe = async () => {
+    if (!email.trim() || !email.includes('@')) {
+      alert('올바른 이메일 주소를 입력하세요.');
+      return;
+    }
+
+    setIsSubscribing(true);
+    try {
+      // 로컬 스토리지에 저장 (실제로는 API 호출)
+      const subscriptions = JSON.parse(localStorage.getItem('newsletter-subscriptions') || '[]');
+      subscriptions.push({
+        email,
+        subscribedAt: new Date().toISOString(),
+        source: 'newsletter-block',
+      });
+      localStorage.setItem('newsletter-subscriptions', JSON.stringify(subscriptions));
+      
+      setSubscribed(true);
+      setEmail('');
+      setTimeout(() => setSubscribed(false), 3000);
+    } catch (error) {
+      alert('구독 중 오류가 발생했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsSubscribing(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !isSubscribing) {
+      handleSubscribe();
+    }
+  };
 
   return (
     <div className="max-w-2xl mx-auto text-center text-white">
       <h2 className="text-3xl font-display font-bold mb-4">{content.title}</h2>
       {content.description && <p className="text-white/80 mb-8">{content.description}</p>}
-      <div className="flex gap-2">
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder={content.placeholder}
-          className="flex-1 px-6 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/30"
-        />
-        <button className="px-8 py-3 bg-white text-primary-600 rounded-xl font-medium hover:bg-white/90 transition-colors">
-          {content.buttonText}
-        </button>
-      </div>
+      {subscribed ? (
+        <div className="px-6 py-4 bg-green-500/20 border border-green-400 rounded-xl text-green-100">
+          구독해주셔서 감사합니다! 확인 이메일을 보내드렸습니다.
+        </div>
+      ) : (
+        <div className="flex gap-2">
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder={content.placeholder || '이메일 주소를 입력하세요'}
+            className="flex-1 px-6 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/30"
+            disabled={isSubscribing}
+          />
+          <button 
+            onClick={handleSubscribe}
+            disabled={isSubscribing || !email.trim()}
+            className="px-8 py-3 bg-white text-primary-600 rounded-xl font-medium hover:bg-white/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSubscribing ? '구독 중...' : (content.buttonText || '구독하기')}
+          </button>
+        </div>
+      )}
       {content.description && (
         <p className="text-sm text-white/60 mt-4">
           {content.description.includes('개인정보') ? content.description : '개인정보 보호 정책에 동의합니다.'}

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'grip-v1';
+const CACHE_NAME = 'freeshell-v1';
 const urlsToCache = [
   '/',
   '/editor',

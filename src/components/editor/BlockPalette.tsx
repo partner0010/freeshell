@@ -47,7 +47,7 @@ export function BlockPalette() {
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col min-h-[500px]">
       {/* 검색 */}
       <div className="relative mb-4">
         <Icons.Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />

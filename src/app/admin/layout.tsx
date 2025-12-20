@@ -34,6 +34,7 @@ const navItems = [
   { href: '/admin', icon: LayoutDashboard, label: '대시보드' },
   { href: '/admin/users', icon: Users, label: '사용자 관리' },
   { href: '/admin/projects', icon: FolderKanban, label: '프로젝트 관리' },
+  { href: '/admin/licenses', icon: Key, label: '라이선스 관리' },
   { href: '/admin/templates', icon: Layout, label: '템플릿 관리' },
   { href: '/admin/content', icon: FileImage, label: '콘텐츠 관리' },
   { href: '/admin/ecommerce', icon: ShoppingCart, label: '이커머스' },
@@ -43,7 +44,6 @@ const navItems = [
   { href: '/admin/monitoring', icon: Activity, label: '시스템 모니터링' },
   { href: '/admin/security', icon: Shield, label: '보안 센터' },
   { href: '/admin/support', icon: LifeBuoy, label: '지원 센터' },
-  { href: '/admin/billing', icon: CreditCard, label: '결제/구독' },
   { href: '/admin/logs', icon: FileText, label: '로그' },
   { href: '/admin/settings', icon: Settings, label: '설정' },
 ];
@@ -58,11 +58,7 @@ export default function AdminLayout({
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
 
-  const notifications = [
-    { id: 1, title: '새 사용자 가입', message: '홍길동님이 가입했습니다.', time: '5분 전', unread: true },
-    { id: 2, title: '프로젝트 생성', message: '새 프로젝트가 생성되었습니다.', time: '1시간 전', unread: true },
-    { id: 3, title: '결제 완료', message: 'Pro 플랜 결제가 완료되었습니다.', time: '3시간 전', unread: false },
-  ];
+  const notifications: Array<{ id: number; title: string; message: string; time: string; unread: boolean }> = [];
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -80,7 +76,7 @@ export default function AdminLayout({
               <Sparkles className="text-white" size={20} />
             </div>
             {sidebarOpen && (
-              <span className="font-display font-bold text-lg">GRIP Admin</span>
+              <span className="font-display font-bold text-lg">Freeshell Admin</span>
             )}
           </Link>
           <button
@@ -220,7 +216,7 @@ export default function AdminLayout({
                 >
                   <div className="p-3 border-b">
                     <p className="font-medium text-gray-800">관리자</p>
-                    <p className="text-xs text-gray-500">admin@grip.app</p>
+                    <p className="text-xs text-gray-500">admin@freeshell.app</p>
                   </div>
                   <div className="p-2">
                     <Link

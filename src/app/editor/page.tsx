@@ -232,17 +232,19 @@ function EditorPageContent() {
       <div className="flex-1 flex overflow-hidden">
         {/* 사이드바 - 미리보기 모드에서 숨김 */}
         {!isPreviewMode && (
-          <OrganizedSidebar
-            activeTab={(useEditorStore.getState().sidebarTab || 'blocks') as any}
-            onTabChange={(tab) => {
-              const state = useEditorStore.getState();
-              // 모든 탭 지원
-              if (['blocks', 'styles', 'ai', 'pages'].includes(tab)) {
-                state.setSidebarTab(tab as 'blocks' | 'styles' | 'ai' | 'pages');
-              }
-            }}
-            currentContext={undefined}
-          />
+          <div className="flex-shrink-0">
+            <OrganizedSidebar
+              activeTab={(useEditorStore.getState().sidebarTab || 'blocks') as any}
+              onTabChange={(tab) => {
+                const state = useEditorStore.getState();
+                // 모든 탭 지원
+                if (['blocks', 'styles', 'ai', 'pages'].includes(tab)) {
+                  state.setSidebarTab(tab as 'blocks' | 'styles' | 'ai' | 'pages');
+                }
+              }}
+              currentContext={undefined}
+            />
+          </div>
         )}
 
         {/* 캔버스 */}

@@ -1,28 +1,29 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
+import { Providers } from './providers'
 
 export const metadata: Metadata = {
-  title: 'GRIP - AI 웹사이트 빌더',
-  description: 'AI와 함께 블록을 쌓듯이 나만의 웹사이트를 만들어보세요',
+  title: 'Freeshell - AI 통합 콘텐츠 생성 솔루션',
+  description: 'AI로 만드는 수익형 콘텐츠. 숏폼, 영상, 이미지, 전자책, 글쓰기까지 완전 자동화',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'GRIP',
+    title: 'Freeshell',
   },
   formatDetection: {
     telephone: false,
   },
   openGraph: {
     type: 'website',
-    siteName: 'GRIP',
-    title: 'GRIP - AI 웹사이트 빌더',
-    description: 'AI와 함께 블록을 쌓듯이 나만의 웹사이트를 만들어보세요',
+    siteName: 'Freeshell',
+    title: 'Freeshell - AI 통합 콘텐츠 생성 솔루션',
+    description: 'AI로 만드는 수익형 콘텐츠. 숏폼, 영상, 이미지, 전자책, 글쓰기까지 완전 자동화',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'GRIP - AI 웹사이트 빌더',
-    description: 'AI와 함께 블록을 쌓듯이 나만의 웹사이트를 만들어보세요',
+    title: 'Freeshell - AI 통합 콘텐츠 생성 솔루션',
+    description: 'AI로 만드는 수익형 콘텐츠. 숏폼, 영상, 이미지, 전자책, 글쓰기까지 완전 자동화',
   },
 }
 
@@ -47,7 +48,9 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
       <body className="antialiased">
-        {children}
+        <Providers>
+          {children}
+        </Providers>
         <script
           dangerouslySetInnerHTML={{
             __html: `

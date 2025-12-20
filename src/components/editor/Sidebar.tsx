@@ -477,9 +477,9 @@ export function Sidebar() {
   };
 
   return (
-    <div className="w-80 h-full bg-white/80 backdrop-blur-xl border-r flex">
+    <div className="w-80 sm:w-96 h-full bg-white/80 backdrop-blur-xl border-r flex flex-col">
       {/* 탭 네비게이션 */}
-      <div className="w-16 py-4 flex flex-col items-center gap-1 border-r bg-surface-light overflow-y-auto">
+      <div className="w-16 sm:w-20 py-4 flex flex-col items-center gap-1 border-r bg-surface-light overflow-y-auto flex-shrink-0">
         {/* 메인 탭 */}
         {mainTabs.map((tab) => {
           const isActive = activeTab === tab.id;
@@ -563,8 +563,10 @@ export function Sidebar() {
       </div>
 
       {/* 패널 콘텐츠 */}
-      <div className="flex-1 p-4 overflow-hidden">
-        {renderPanel()}
+      <div className="flex-1 p-4 sm:p-6 overflow-y-auto min-h-0" style={{ minHeight: '500px', maxHeight: 'calc(100vh - 150px)' }}>
+        <div className="h-full w-full min-h-[500px]">
+          {renderPanel()}
+        </div>
       </div>
     </div>
   );

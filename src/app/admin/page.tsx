@@ -17,67 +17,50 @@ import {
   Zap,
 } from 'lucide-react';
 
-// 통계 카드 데이터
+// 통계 카드 데이터 (실제 데이터로 대체 필요)
 const stats = [
   {
     title: '총 사용자',
-    value: '12,847',
-    change: '+12.5%',
-    trend: 'up',
+    value: '0',
+    change: '0%',
+    trend: 'up' as const,
     icon: Users,
     color: 'from-blue-500 to-blue-600',
   },
   {
     title: '활성 프로젝트',
-    value: '3,429',
-    change: '+8.2%',
-    trend: 'up',
+    value: '0',
+    change: '0%',
+    trend: 'up' as const,
     icon: FolderKanban,
     color: 'from-green-500 to-green-600',
   },
   {
-    title: '월간 수익',
-    value: '₩45.2M',
-    change: '+23.1%',
-    trend: 'up',
-    icon: CreditCard,
+    title: '오늘 생성된 콘텐츠',
+    value: '0',
+    change: '0%',
+    trend: 'up' as const,
+    icon: Activity,
     color: 'from-purple-500 to-purple-600',
   },
   {
-    title: '전환율',
-    value: '4.28%',
-    change: '-0.3%',
-    trend: 'down',
-    icon: TrendingUp,
+    title: '시스템 상태',
+    value: '정상',
+    change: '100%',
+    trend: 'up' as const,
+    icon: Zap,
     color: 'from-orange-500 to-orange-600',
   },
 ];
 
-// 최근 활동 데이터
-const recentActivities = [
-  { id: 1, user: '김철수', action: '새 프로젝트 생성', project: '랜딩 페이지', time: '2분 전' },
-  { id: 2, user: '이영희', action: 'Pro 플랜 업그레이드', project: '-', time: '15분 전' },
-  { id: 3, user: '박민수', action: '템플릿 다운로드', project: 'SaaS 랜딩', time: '32분 전' },
-  { id: 4, user: '정지원', action: '웹사이트 게시', project: '포트폴리오', time: '1시간 전' },
-  { id: 5, user: '최현우', action: '회원 가입', project: '-', time: '2시간 전' },
-];
+// 최근 활동 데이터 (실제 데이터로 대체 필요)
+const recentActivities: Array<{ id: number; user: string; action: string; project: string; time: string }> = [];
 
-// 인기 템플릿 데이터
-const popularTemplates = [
-  { name: 'SaaS 랜딩', downloads: 1234, growth: 15 },
-  { name: '포트폴리오', downloads: 987, growth: 8 },
-  { name: '기업 소개', downloads: 756, growth: 12 },
-  { name: '이커머스', downloads: 654, growth: -3 },
-  { name: '블로그', downloads: 543, growth: 5 },
-];
+// 인기 템플릿 데이터 (실제 데이터로 대체 필요)
+const popularTemplates: Array<{ name: string; downloads: number; growth: number }> = [];
 
-// 트래픽 소스 데이터
-const trafficSources = [
-  { source: '직접 접속', value: 45, color: 'bg-blue-500' },
-  { source: '검색 엔진', value: 30, color: 'bg-green-500' },
-  { source: '소셜 미디어', value: 15, color: 'bg-purple-500' },
-  { source: '레퍼럴', value: 10, color: 'bg-orange-500' },
-];
+// 트래픽 소스 데이터 (실제 데이터로 대체 필요)
+const trafficSources: Array<{ source: string; value: number; color: string }> = [];
 
 export default function AdminDashboard() {
   return (
@@ -86,7 +69,7 @@ export default function AdminDashboard() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-display font-bold text-gray-800">대시보드</h1>
-          <p className="text-gray-500 mt-1">GRIP 플랫폼 전체 현황을 확인하세요</p>
+          <p className="text-gray-500 mt-1">Freeshell 플랫폼 전체 현황을 확인하세요</p>
         </div>
         <div className="flex items-center gap-2">
           <select className="px-4 py-2 bg-white border rounded-lg text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-300">
@@ -178,22 +161,29 @@ export default function AdminDashboard() {
           </div>
           
           {/* 빠른 통계 */}
-          <div className="grid grid-cols-2 gap-4 mt-6 pt-6 border-t">
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-1 text-gray-500 text-sm mb-1">
-                <Eye size={14} />
-                페이지뷰
+          {trafficSources.length > 0 && (
+            <div className="grid grid-cols-2 gap-4 mt-6 pt-6 border-t">
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-1 text-gray-500 text-sm mb-1">
+                  <Eye size={14} />
+                  페이지뷰
+                </div>
+                <p className="text-xl font-bold text-gray-800">-</p>
               </div>
-              <p className="text-xl font-bold text-gray-800">284K</p>
-            </div>
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-1 text-gray-500 text-sm mb-1">
-                <Clock size={14} />
-                체류 시간
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-1 text-gray-500 text-sm mb-1">
+                  <Clock size={14} />
+                  체류 시간
+                </div>
+                <p className="text-xl font-bold text-gray-800">-</p>
               </div>
-              <p className="text-xl font-bold text-gray-800">4:32</p>
             </div>
-          </div>
+          )}
+          {trafficSources.length === 0 && (
+            <div className="mt-6 pt-6 border-t text-center text-gray-500 text-sm">
+              트래픽 데이터가 없습니다. 실제 사용 데이터가 수집되면 여기에 표시됩니다.
+            </div>
+          )}
         </div>
       </div>
 
@@ -206,23 +196,29 @@ export default function AdminDashboard() {
             <button className="text-primary-500 text-sm hover:underline">전체 보기</button>
           </div>
           <div className="space-y-4">
-            {recentActivities.map((activity) => (
-              <div key={activity.id} className="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-xl transition-colors">
-                <div className="w-10 h-10 bg-gradient-to-br from-primary-400 to-primary-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                  {activity.user[0]}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-800">
-                    <span className="font-medium">{activity.user}</span>님이 {activity.action}
-                    {activity.project !== '-' && (
-                      <span className="text-primary-500"> ({activity.project})</span>
-                    )}
-                  </p>
-                  <p className="text-xs text-gray-400 mt-0.5">{activity.time}</p>
-                </div>
-                <Activity size={16} className="text-gray-400" />
+            {recentActivities.length === 0 ? (
+              <div className="text-center py-8 text-gray-500 text-sm">
+                최근 활동이 없습니다.
               </div>
-            ))}
+            ) : (
+              recentActivities.map((activity) => (
+                <div key={activity.id} className="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-xl transition-colors">
+                  <div className="w-10 h-10 bg-gradient-to-br from-primary-400 to-primary-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                    {activity.user[0]}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-gray-800">
+                      <span className="font-medium">{activity.user}</span>님이 {activity.action}
+                      {activity.project !== '-' && (
+                        <span className="text-primary-500"> ({activity.project})</span>
+                      )}
+                    </p>
+                    <p className="text-xs text-gray-400 mt-0.5">{activity.time}</p>
+                  </div>
+                  <Activity size={16} className="text-gray-400" />
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -233,21 +229,27 @@ export default function AdminDashboard() {
             <button className="text-primary-500 text-sm hover:underline">전체 보기</button>
           </div>
           <div className="space-y-4">
-            {popularTemplates.map((template, i) => (
-              <div key={template.name} className="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-xl transition-colors">
-                <div className="w-10 h-10 bg-gradient-to-br from-pastel-lavender to-pastel-sky rounded-xl flex items-center justify-center text-primary-600 font-bold">
-                  {i + 1}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-gray-800">{template.name}</p>
-                  <p className="text-xs text-gray-400">{template.downloads.toLocaleString()} 다운로드</p>
-                </div>
-                <div className={`flex items-center gap-1 text-sm ${template.growth >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                  {template.growth >= 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
-                  {Math.abs(template.growth)}%
-                </div>
+            {popularTemplates.length === 0 ? (
+              <div className="text-center py-8 text-gray-500 text-sm">
+                인기 템플릿 데이터가 없습니다.
               </div>
-            ))}
+            ) : (
+              popularTemplates.map((template, i) => (
+                <div key={template.name} className="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-xl transition-colors">
+                  <div className="w-10 h-10 bg-gradient-to-br from-pastel-lavender to-pastel-sky rounded-xl flex items-center justify-center text-primary-600 font-bold">
+                    {i + 1}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-gray-800">{template.name}</p>
+                    <p className="text-xs text-gray-400">{template.downloads.toLocaleString()} 다운로드</p>
+                  </div>
+                  <div className={`flex items-center gap-1 text-sm ${template.growth >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    {template.growth >= 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+                    {Math.abs(template.growth)}%
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

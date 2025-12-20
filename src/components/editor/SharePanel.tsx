@@ -11,8 +11,12 @@ export function SharePanel() {
   const [showQR, setShowQR] = useState(false);
 
   // 데모용 URL (실제로는 서버에서 생성)
-  const previewUrl = `https://grip.app/preview/${project?.id || 'demo'}`;
-  const shareUrl = `https://grip.app/s/${project?.id || 'demo'}`;
+  const previewUrl = typeof window !== 'undefined' 
+    ? `${window.location.origin}/preview/${project?.id || 'demo'}`
+    : `https://freeshell.app/preview/${project?.id || 'demo'}`;
+  const shareUrl = typeof window !== 'undefined'
+    ? `${window.location.origin}/s/${project?.id || 'demo'}`
+    : `https://freeshell.app/s/${project?.id || 'demo'}`;
 
   const handleCopy = async (url: string) => {
     await navigator.clipboard.writeText(url);

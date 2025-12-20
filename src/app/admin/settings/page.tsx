@@ -92,7 +92,7 @@ export default function SettingsPage() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">사이트 이름</label>
-                  <input type="text" defaultValue="GRIP" className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-300" />
+                  <input type="text" defaultValue="Freeshell" className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-300" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">사이트 설명</label>

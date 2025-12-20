@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Sparkles, X, Minimize2, Maximize2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { generateSparkPage, collectInformationWithAgents } from '@/lib/ai/genspark';
 
 interface Message {
   id: string;
@@ -51,47 +52,79 @@ export function GensparkStyleCopilot({ onCommand }: GensparkStyleCopilotProps) {
     };
 
     setMessages((prev) => [...prev, userMessage]);
+    const currentInput = input.trim();
     setInput('');
     setIsProcessing(true);
 
-    // AI 응답 시뮬레이션
-    setTimeout(() => {
-      const assistantMessage: Message = {
-        id: `assistant-${Date.now()}`,
-        role: 'assistant',
-        content: generateResponse(userMessage.content),
-        timestamp: Date.now(),
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
-      setIsProcessing(false);
+    // GENSPARK AI를 사용한 응답 생성
+    try {
+      // 검색 쿼리인지 확인
+      const isSearchQuery = /\b(검색|찾기|정보|알려|설명|뭐야|무엇|어떤)\b/.test(currentInput.toLowerCase());
+      
+      if (isSearchQuery) {
+        // GENSPARK 검색 사용
+        const sparkPage = await generateSparkPage({
+          query: currentInput,
+          language: 'ko',
+          maxResults: 5,
+        });
+
+        const assistantMessage: Message = {
+          id: `assistant-${Date.now()}`,
+          role: 'assistant',
+          content: `# ${sparkPage.title}\n\n${sparkPage.content}\n\n## 출처\n${sparkPage.sources.map(s => `- [${s.title}](${s.url})`).join('\n')}`,
+          timestamp: Date.now(),
+        };
+        setMessages((prev) => [...prev, assistantMessage]);
+      } else {
+        // 일반 AI 응답
+        const agents = await collectInformationWithAgents(currentInput, ['research', 'summarize']);
+        const assistantMessage: Message = {
+          id: `assistant-${Date.now()}`,
+          role: 'assistant',
+          content: generateResponse(currentInput, agents),
+          timestamp: Date.now(),
+        };
+        setMessages((prev) => [...prev, assistantMessage]);
+      }
 
       // 명령 실행
       if (onCommand) {
-        onCommand(userMessage.content);
+        onCommand(currentInput);
       }
-    }, 1500);
+    } catch (error: any) {
+      const errorMessage: Message = {
+        id: `error-${Date.now()}`,
+        role: 'assistant',
+        content: `오류가 발생했습니다: ${error.message}`,
+        timestamp: Date.now(),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
-  const generateResponse = (userInput: string): string => {
+  const generateResponse = (userInput: string, agents: any): string => {
     const lower = userInput.toLowerCase();
 
     if (/\b(웹사이트|사이트|페이지)\b/.test(lower)) {
-      return '웹사이트를 생성하겠습니다. 어떤 스타일로 만들까요?';
+      return `웹사이트를 생성하겠습니다. GENSPARK AI가 정보를 수집했습니다:\n\n${agents.research}\n\n${agents.summary}`;
     }
 
     if (/\b(디자인|스타일|테마)\b/.test(lower)) {
-      return '디자인을 개선하겠습니다. 어떤 부분을 개선하고 싶으신가요?';
+      return `디자인을 개선하겠습니다. AI가 분석한 내용:\n\n${agents.summary}`;
     }
 
     if (/\b(코드|프로그램|개발)\b/.test(lower)) {
-      return '코드를 생성하겠습니다. 어떤 기능이 필요하신가요?';
+      return `코드를 생성하겠습니다. 관련 정보:\n\n${agents.research}`;
     }
 
     if (/\b(비디오|영상|동영상)\b/.test(lower)) {
-      return '비디오를 생성하겠습니다. FREESHELL을 통해 작업을 시작합니다.';
+      return `비디오를 생성하겠습니다. FREESHELL을 통해 작업을 시작합니다.\n\n${agents.summary}`;
     }
 
-    return '알겠습니다. 작업을 진행하겠습니다.';
+    return `알겠습니다. 작업을 진행하겠습니다.\n\n${agents.summary}`;
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

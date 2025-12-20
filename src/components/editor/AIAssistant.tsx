@@ -19,6 +19,8 @@ export function AIAssistant() {
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { aiMessages, addAiMessage, isAiLoading, setAiLoading, addBlock, getCurrentPage } = useEditorStore();
+  
+  // AIAssistant 컴포넌트 최소 높이 보장
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -140,7 +142,7 @@ export function AIAssistant() {
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col min-h-[500px]">
       {/* 헤더 */}
       <div className="flex items-center gap-3 mb-4 pb-4 border-b">
         <div className="w-10 h-10 bg-gradient-to-br from-primary-400 to-primary-600 rounded-xl flex items-center justify-center">

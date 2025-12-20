@@ -1,7 +1,7 @@
 {
-  "name": "GRIP - AI 웹 개발 플랫폼",
-  "short_name": "GRIP",
-  "description": "AI 기반 통합 웹 개발 플랫폼",
+  "name": "Freeshell - AI 통합 콘텐츠 생성 솔루션",
+  "short_name": "Freeshell",
+  "description": "AI로 만드는 수익형 콘텐츠. 숏폼, 영상, 이미지, 전자책, 글쓰기까지 완전 자동화",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

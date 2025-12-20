@@ -29,6 +29,8 @@ import {
 } from 'lucide-react';
 import { useEditorStore } from '@/store/editor-store';
 import { generateUUID } from '@/utils/uuid';
+import { KeyboardShortcuts } from './KeyboardShortcuts';
+import { SharePanel } from './SharePanel';
 
 interface CommandItem {
   id: string;
@@ -44,8 +46,14 @@ export default function CommandPalette() {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [showShortcuts, setShowShortcuts] = useState(false);
+  const [showShare, setShowShare] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const { undo, redo, addBlock, isPreviewMode, setPreviewMode } = useEditorStore();
+  const { 
+    undo, redo, addBlock, isPreviewMode, setPreviewMode,
+    selectedBlockId, duplicateBlock, deleteBlock, project,
+    setSidebarTab, getCurrentPage
+  } = useEditorStore();
 
   // 명령어 목록
   const commands: CommandItem[] = [
@@ -59,26 +67,155 @@ export default function CommandPalette() {
     // 편집
     { id: 'undo', label: '실행 취소', icon: Undo, category: '편집', action: undo, shortcut: 'Ctrl+Z' },
     { id: 'redo', label: '다시 실행', icon: Redo, category: '편집', action: redo, shortcut: 'Ctrl+Shift+Z' },
-    { id: 'duplicate', label: '블록 복제', icon: Copy, category: '편집', action: () => {}, shortcut: 'Ctrl+D' },
-    { id: 'delete', label: '블록 삭제', icon: Trash2, category: '편집', action: () => {}, shortcut: 'Delete' },
+    { 
+      id: 'duplicate', 
+      label: '블록 복제', 
+      icon: Copy, 
+      category: '편집', 
+      action: () => {
+        if (selectedBlockId) {
+          duplicateBlock(selectedBlockId);
+        }
+      }, 
+      shortcut: 'Ctrl+D' 
+    },
+    { 
+      id: 'delete', 
+      label: '블록 삭제', 
+      icon: Trash2, 
+      category: '편집', 
+      action: () => {
+        if (selectedBlockId) {
+          if (confirm('이 블록을 삭제하시겠습니까?')) {
+            deleteBlock(selectedBlockId);
+          }
+        }
+      }, 
+      shortcut: 'Delete' 
+    },
     
     // 파일
-    { id: 'save', label: '저장', icon: Save, category: '파일', action: () => {}, shortcut: 'Ctrl+S' },
-    { id: 'export', label: '내보내기', icon: Download, category: '파일', action: () => {}, shortcut: 'Ctrl+E' },
+    { 
+      id: 'save', 
+      label: '저장', 
+      icon: Save, 
+      category: '파일', 
+      action: () => {
+        // 로컬 스토리지에 저장
+        const currentPage = getCurrentPage();
+        if (project && currentPage) {
+          const data = {
+            project,
+            currentPage,
+            savedAt: new Date().toISOString(),
+          };
+          localStorage.setItem('freeshell-project', JSON.stringify(data));
+          alert('저장되었습니다!');
+        }
+      }, 
+      shortcut: 'Ctrl+S' 
+    },
+    { 
+      id: 'export', 
+      label: '내보내기', 
+      icon: Download, 
+      category: '파일', 
+      action: () => {
+        const currentPage = getCurrentPage();
+        if (currentPage && project) {
+          const data = {
+            project,
+            currentPage,
+            exportedAt: new Date().toISOString(),
+          };
+          const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${project.name || 'project'}-${new Date().toISOString().split('T')[0]}.json`;
+          a.click();
+          URL.revokeObjectURL(url);
+        }
+      }, 
+      shortcut: 'Ctrl+E' 
+    },
     { id: 'preview', label: '미리보기', icon: Eye, category: '파일', action: () => setPreviewMode(!isPreviewMode), shortcut: 'Ctrl+P' },
     
     // 보기
-    { id: 'settings', label: '설정', icon: Settings, category: '보기', action: () => {}, shortcut: 'Ctrl+,' },
-    { id: 'theme', label: '테마 변경', icon: Palette, category: '보기', action: () => {}, shortcut: '' },
-    { id: 'pages', label: '페이지 관리', icon: FileText, category: '보기', action: () => {}, shortcut: '' },
+    { 
+      id: 'settings', 
+      label: '설정', 
+      icon: Settings, 
+      category: '보기', 
+      action: () => {
+        setSidebarTab('pages');
+      }, 
+      shortcut: 'Ctrl+,' 
+    },
+    { 
+      id: 'theme', 
+      label: '테마 변경', 
+      icon: Palette, 
+      category: '보기', 
+      action: () => {
+        setSidebarTab('theme');
+      }, 
+      shortcut: '' 
+    },
+    { 
+      id: 'pages', 
+      label: '페이지 관리', 
+      icon: FileText, 
+      category: '보기', 
+      action: () => {
+        setSidebarTab('pages');
+      }, 
+      shortcut: '' 
+    },
     
     // 협업
-    { id: 'share', label: '공유', icon: Share2, category: '협업', action: () => {}, shortcut: '' },
-    { id: 'invite', label: '팀원 초대', icon: Users, category: '협업', action: () => {}, shortcut: '' },
+    { 
+      id: 'share', 
+      label: '공유', 
+      icon: Share2, 
+      category: '협업', 
+      action: () => {
+        setShowShare(true);
+      }, 
+      shortcut: '' 
+    },
+    { 
+      id: 'invite', 
+      label: '팀원 초대', 
+      icon: Users, 
+      category: '협업', 
+      action: () => {
+        setSidebarTab('collab');
+      }, 
+      shortcut: '' 
+    },
     
     // 도움말
-    { id: 'shortcuts', label: '키보드 단축키', icon: Command, category: '도움말', action: () => {}, shortcut: 'Ctrl+/' },
-    { id: 'help', label: '도움말', icon: HelpCircle, category: '도움말', action: () => {}, shortcut: '' },
+    { 
+      id: 'shortcuts', 
+      label: '키보드 단축키', 
+      icon: Command, 
+      category: '도움말', 
+      action: () => {
+        setShowShortcuts(true);
+      }, 
+      shortcut: 'Ctrl+/' 
+    },
+    { 
+      id: 'help', 
+      label: '도움말', 
+      icon: HelpCircle, 
+      category: '도움말', 
+      action: () => {
+        window.open('https://freeshell.app/docs', '_blank');
+      }, 
+      shortcut: '' 
+    },
   ];
 
   // 필터링된 명령어
@@ -262,6 +399,52 @@ export default function CommandPalette() {
                   </span>
                 </div>
               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 키보드 단축키 모달 */}
+      <AnimatePresence>
+        {showShortcuts && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[101] bg-black/50 flex items-center justify-center p-4"
+            onClick={() => setShowShortcuts(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[80vh] overflow-auto"
+            >
+              <KeyboardShortcuts onClose={() => setShowShortcuts(false)} />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 공유 모달 */}
+      <AnimatePresence>
+        {showShare && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[101] bg-black/50 flex items-center justify-center p-4"
+            onClick={() => setShowShare(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-auto"
+            >
+              <SharePanel />
             </motion.div>
           </motion.div>
         )}

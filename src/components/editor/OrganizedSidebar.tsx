@@ -92,39 +92,41 @@ export function OrganizedSidebar({
     }));
 
     return (
-      <div className="w-80 h-full bg-white border-r flex flex-col">
-        <div className="p-4 border-b flex items-center justify-between">
-          <h2 className="font-semibold">메뉴 검색</h2>
+      <div className="w-full sm:w-[480px] lg:w-[600px] h-full bg-white border-r flex flex-col shadow-lg">
+        <div className="p-3 sm:p-4 border-b flex items-center justify-between flex-shrink-0">
+          <h2 className="font-semibold text-base sm:text-lg">메뉴 검색</h2>
           <button
             onClick={() => setShowSearch(false)}
-            className="p-1 hover:bg-gray-100 rounded"
+            className="p-1.5 sm:p-2 hover:bg-gray-100 rounded transition-colors"
           >
-            <X size={20} />
+            <X size={18} className="sm:w-5 sm:h-5" />
           </button>
         </div>
-        <MenuSearch
-          items={allItems}
-          onSelect={handleSelect}
-          favorites={favorites}
-          recent={recent}
-          onToggleFavorite={handleToggleFavorite}
-        />
+        <div className="flex-1 overflow-auto">
+          <MenuSearch
+            items={allItems}
+            onSelect={handleSelect}
+            favorites={favorites}
+            recent={recent}
+            onToggleFavorite={handleToggleFavorite}
+          />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="w-80 h-full bg-white border-r flex flex-col">
+    <div className="w-full sm:w-[480px] lg:w-[600px] h-full bg-white border-r flex flex-col shadow-lg">
       {/* 헤더 */}
-      <div className="p-4 border-b">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="font-bold text-lg">메뉴</h2>
+      <div className="p-3 sm:p-4 border-b flex-shrink-0">
+        <div className="flex items-center justify-between mb-2 sm:mb-3">
+          <h2 className="font-bold text-base sm:text-lg">메뉴</h2>
           <button
             onClick={() => setShowSearch(true)}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-lg transition-colors"
             title="검색 (Ctrl+K)"
           >
-            <Search size={18} />
+            <Search size={16} className="sm:w-[18px] sm:h-[18px]" />
           </button>
         </div>
 
@@ -155,7 +157,7 @@ export function OrganizedSidebar({
 
       {/* 컨텍스트별 메뉴 (있는 경우) */}
       {contextualItems.length > 0 && (
-        <div className="p-4 border-b bg-primary-50">
+        <div className="p-3 sm:p-4 border-b bg-primary-50 flex-shrink-0">
           <div className="text-xs font-semibold text-primary-700 mb-2">
             추천 메뉴
           </div>
@@ -178,9 +180,9 @@ export function OrganizedSidebar({
       )}
 
       {/* 메뉴와 패널 분리 레이아웃 */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* 카테고리별 메뉴 */}
-        <div className="w-64 border-r overflow-auto">
+      <div className="flex-1 flex overflow-hidden min-h-0">
+        {/* 카테고리별 메뉴 - 더 작게 */}
+        <div className="w-48 sm:w-56 lg:w-64 border-r overflow-auto flex-shrink-0">
           <div className="p-2">
             {categories.map((category) => {
               const isCollapsed = collapsedCategories.has(category.id);
@@ -193,19 +195,19 @@ export function OrganizedSidebar({
                   {/* 카테고리 헤더 */}
                   <button
                     onClick={() => toggleCategory(category.id)}
-                    className="w-full flex items-center justify-between px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                    className="w-full flex items-center justify-between px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
                   >
-                    <div className="flex items-center gap-2">
-                      {category.icon && <category.icon size={16} />}
-                      <span>{category.label}</span>
-                      <span className="text-xs text-gray-400">
+                    <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                      {category.icon && <category.icon size={14} className="sm:w-4 sm:h-4 flex-shrink-0" />}
+                      <span className="truncate">{category.label}</span>
+                      <span className="text-xs text-gray-400 flex-shrink-0">
                         ({categoryItems.length})
                       </span>
                     </div>
                     {isCollapsed ? (
-                      <ChevronRight size={16} />
+                      <ChevronRight size={14} className="sm:w-4 sm:h-4 flex-shrink-0" />
                     ) : (
-                      <ChevronDown size={16} />
+                      <ChevronDown size={14} className="sm:w-4 sm:h-4 flex-shrink-0" />
                     )}
                   </button>
 
@@ -219,19 +221,19 @@ export function OrganizedSidebar({
                         transition={{ duration: 0.2 }}
                         className="overflow-hidden"
                       >
-                        <div className="pl-4 space-y-1">
+                        <div className="pl-3 sm:pl-4 space-y-1">
                           {categoryItems.map((item) => (
                             <button
                               key={item.id}
                               onClick={() => handleSelect(item.id)}
-                              className={`w-full flex items-center justify-between px-3 py-1.5 text-sm rounded-lg transition-colors group ${
+                              className={`w-full flex items-center justify-between px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm rounded-lg transition-colors group ${
                                 activeTab === item.id
                                   ? 'bg-primary-100 text-primary-700'
                                   : 'text-gray-700 hover:bg-gray-50'
                               }`}
                             >
-                              <span>{item.label}</span>
-                              <div className="flex items-center gap-1">
+                              <span className="truncate">{item.label}</span>
+                              <div className="flex items-center gap-1 flex-shrink-0">
                                 {favorites.includes(item.id) && (
                                   <Star size={12} className="text-yellow-500 fill-current" />
                                 )}
@@ -264,15 +266,19 @@ export function OrganizedSidebar({
           </div>
         </div>
 
-        {/* 패널 영역 */}
-        <div className="flex-1 overflow-auto">
-          {renderSidebarPanel(activeTab)}
+        {/* 패널 영역 - 더 크게 */}
+        <div className="flex-1 overflow-auto min-w-0 bg-gray-50" style={{ minHeight: '500px' }}>
+          <div className="p-4 sm:p-6 h-full min-h-[500px]">
+            <div className="h-full w-full">
+              {renderSidebarPanel(activeTab)}
+            </div>
+          </div>
         </div>
       </div>
 
       {/* 최근 사용 */}
       {recent.length > 0 && (
-        <div className="p-4 border-t bg-gray-50">
+        <div className="p-3 sm:p-4 border-t bg-gray-50 flex-shrink-0">
           <div className="text-xs font-semibold text-gray-600 mb-2 flex items-center gap-1">
             <Clock size={12} />
             최근 사용

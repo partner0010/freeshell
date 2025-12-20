@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>도메인 점검 도우미</title>
+  <style>
+    body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; max-width: 920px; margin: 40px auto; padding: 0 20px; background: #f5f7fb; color: #1f2937; }
+    h1 { color: #111827; }
+    .card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 16px; }
+    button { padding: 10px 16px; border-radius: 10px; border: 0; background: #2563eb; color: #fff; cursor: pointer; font-weight: 600; }
+    button:disabled { background: #93c5fd; cursor: not-allowed; }
+    .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .badge { display: inline-block; padding: 4px 8px; border-radius: 8px; font-size: 12px; font-weight: 700; }
+    .ok { background: #dcfce7; color: #166534; }
+    .warn { background: #fef9c3; color: #854d0e; }
+    .err { background: #fee2e2; color: #991b1b; }
+    pre { background: #0f172a; color: #e2e8f0; padding: 12px; border-radius: 10px; overflow-x: auto; font-size: 13px; }
+    a { color: #2563eb; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <h1>도메인 점검 도우미</h1>
+  <div class="card">
+    <p>아래 버튼을 눌러 도메인에 실제로 요청을 보내보고, 결과에 따라 수정해야 할 내용을 안내합니다.</p>
+    <div class="row">
+      <button id="runTest">도메인 테스트 실행</button>
+      <span id="statusMsg">대기 중</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>테스트 대상</h2>
+    <ul>
+      <li><strong>Vercel 기본 도메인:</strong> <a href="https://freeshell.vercel.app" target="_blank">https://freeshell.vercel.app</a></li>
+      <li><strong>커스텀 도메인:</strong> <a href="https://freeshell.co.kr" target="_blank">https://freeshell.co.kr</a></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>결과</h2>
+    <div id="results">아직 테스트하지 않았습니다.</div>
+  </div>
+
+  <div class="card">
+    <h2>무엇을 고쳐야 하나요?</h2>
+    <div id="diagnosis">테스트 후 안내가 여기에 표시됩니다.</div>
+  </div>
+
+  <div class="card">
+    <h2>Cloudflare Tunnel / DNS 체크리스트</h2>
+    <ul>
+      <li>터널 프로세스 실행 중인지 확인: <code>cloudflared tunnel run &lt;tunnel-name&gt;</code></li>
+      <li>Cloudflare 대시보드 → Zero Trust / Tunnels: 터널 상태가 <strong>Active</strong>인지 확인</li>
+      <li>DNS: <code>freeshell.co.kr</code>이 Vercel 배포 URL로 CNAME 설정되어 있는지 확인</li>
+      <li>터널 재시작 후 2~3분 뒤 커스텀 도메인 재접속</li>
+    </ul>
+    <p>ESLint 경고(이미지 alt, useEffect deps 등)는 빌드 실패와 무관하니 우선 무시해도 됩니다.</p>
+  </div>
+
+  <script>
+    const runBtn = document.getElementById('runTest');
+    const statusMsg = document.getElementById('statusMsg');
+    const resultsDiv = document.getElementById('results');
+    const diagnosisDiv = document.getElementById('diagnosis');
+
+    const targets = [
+      { name: 'Vercel 기본 도메인', url: 'https://freeshell.vercel.app' },
+      { name: '커스텀 도메인', url: 'https://freeshell.co.kr' }
+    ];
+
+    async function testUrl(target) {
+      const start = performance.now();
+      try {
+        const res = await fetch(target.url, { method: 'HEAD', mode: 'no-cors' });
+        const elapsed = Math.round(performance.now() - start);
+        return { ok: true, status: res.status || 'no-cors', time: elapsed };
+      } catch (e) {
+        const elapsed = Math.round(performance.now() - start);
+        return { ok: false, error: e?.message || e, time: elapsed };
+      }
+    }
+
+    runBtn.addEventListener('click', async () => {
+      runBtn.disabled = true;
+      statusMsg.textContent = '테스트 중...';
+      let html = '';
+      const resultSummary = {};
+
+      for (const t of targets) {
+        const r = await testUrl(t);
+        resultSummary[t.name] = r.ok;
+        html += `<div class="row"><div><strong>${t.name}</strong> (${t.url})</div>`;
+        if (r.ok) {
+          html += `<span class="badge ok">OK</span> <span>${r.time}ms</span>`;
+        } else {
+          html += `<span class="badge err">ERROR</span> <span>${r.error}</span>`;
+        }
+        html += `</div>`;
+      }
+
+      resultsDiv.innerHTML = html;
+      statusMsg.textContent = '완료';
+
+      // Diagnose
+      if (resultSummary['Vercel 기본 도메인'] && !resultSummary['커스텀 도메인']) {
+        diagnosisDiv.innerHTML = `
+          <p><span class="badge err">원인</span> 앱 배포는 정상이나 <strong>Cloudflare 터널/도메인 설정</strong> 문제입니다.</p>
+          <ul>
+            <li>터널 프로세스 재시작: <code>cloudflared tunnel run &lt;tunnel-name&gt;</code></li>
+            <li>Cloudflare Tunnels 상태가 Active인지 확인</li>
+            <li>DNS CNAME이 Vercel 배포 URL로 향하는지 확인</li>
+            <li>재시작 후 2~3분 뒤 커스텀 도메인 재접속</li>
+          </ul>`;
+      } else if (!resultSummary['Vercel 기본 도메인']) {
+        diagnosisDiv.innerHTML = `
+          <p><span class="badge err">원인</span> Vercel 기본 도메인도 응답이 없습니다. 일시적 네트워크/배포 오류 가능성이 있습니다.</p>
+          <ul>
+            <li>Vercel 대시보드에서 최신 배포 상태 확인</li>
+            <li>잠시 후 재시도, 또는 로컬에서 <code>npm run build</code>로 재확인</li>
+          </ul>`;
+      } else {
+        diagnosisDiv.innerHTML = `
+          <p><span class="badge ok">정상</span> 두 도메인 모두 응답했습니다. 문제가 지속된다면 브라우저 캐시 또는 지역 네트워크 이슈일 수 있습니다.</p>`;
+      }
+
+      runBtn.disabled = false;
+    });
+  </script>
+</body>
+</html>
