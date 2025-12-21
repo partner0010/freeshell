@@ -1,42 +1,37 @@
-# Freeshell 프로젝트 가이드
+# Freeshell
 
-## 📚 주요 가이드
+AI 서비스 플랫폼
 
-### 배포 가이드
-- [빠른 배포 가이드](QUICK_DEPLOY.md)
-- [배포 가이드](DEPLOY_GUIDE.md)
+## 배포
 
-### 빌드 오류 해결
-- [빌드 오류 수정 가이드](BUILD_ERRORS.md) - 모든 빌드 오류 해결 방법 통합
+### Netlify (권장)
 
-### 도메인 및 접속 문제
-- [도메인 접속 가이드](DOMAIN_ACCESS_GUIDE.md) - 도메인 접속 문제 해결
+1. Netlify 가입: `https://www.netlify.com`
+2. GitHub 저장소 연결
+3. Build settings:
+   - Build command: `npx prisma generate && npm run build`
+   - Publish directory: `.next`
+4. 환경 변수 설정:
+   - `DATABASE_URL`
+   - `NEXTAUTH_SECRET`
+   - `NEXTAUTH_URL`
 
-### 기능 구현
-- [인증 구현 완료](AUTH_IMPLEMENTATION_COMPLETE.md)
-- [2025 트렌드 구현](2025_TRENDS_IMPLEMENTATION.md)
-- [콘텐츠 제작 기능](CONTENT_CREATION_2025.md)
-- [라이선스 시스템](LICENSE_SYSTEM.md)
+### Vercel
 
-## 🚀 빠른 시작
+현재 Vercel 배포 시 Prisma Client 생성 문제가 발생하고 있습니다.
 
-### 로컬 개발
+## 로컬 개발
+
 ```bash
-.github\preview-local.bat
+npm install
+npx prisma generate
+npm run dev
 ```
 
-### 배포
-```bash
-.github\deploy.bat
-```
+## 주요 기능
 
-### 빌드 오류 수정
-```bash
-.github\fix-build.bat
-```
-
-## 📝 유지보수
-
-이 폴더의 파일들은 프로젝트 관리 및 배포를 위한 문서와 스크립트입니다.
-중복되거나 오래된 파일은 정기적으로 정리됩니다.
+- AI 콘텐츠 생성
+- 사용자 인증 (NextAuth)
+- 구독 라이선스 관리
+- 관리자 대시보드
 
