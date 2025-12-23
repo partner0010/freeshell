@@ -29,6 +29,7 @@ import {
   Activity,
   LifeBuoy,
   Key,
+  Clock,
 } from 'lucide-react';
 
 const navItems = [
@@ -43,10 +44,16 @@ const navItems = [
   { href: '/admin/marketing', icon: Megaphone, label: '마케팅' },
   { href: '/admin/analytics', icon: BarChart3, label: '분석' },
   { href: '/admin/monitoring', icon: Activity, label: '시스템 모니터링' },
+  { href: '/admin/trends', icon: Sparkles, label: '트렌드 학습' },
   { href: '/admin/security', icon: Shield, label: '보안 센터' },
+  { href: '/admin/security/report', icon: FileText, label: '보안 보고서' },
+  { href: '/admin/learning', icon: Sparkles, label: 'AI 학습 제안' },
+  { href: '/admin/health', icon: Activity, label: '자동 점검' },
+  { href: '/admin/health/schedule', icon: Clock, label: '점검 스케줄' },
   { href: '/admin/support', icon: LifeBuoy, label: '지원 센터' },
   { href: '/admin/logs', icon: FileText, label: '로그' },
   { href: '/admin/settings', icon: Settings, label: '설정' },
+  { href: '/admin/settings/options', icon: Settings, label: '기능 옵션' },
 ];
 
 export default function AdminLayout({

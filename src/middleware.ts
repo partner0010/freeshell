@@ -6,6 +6,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
+import { securityMiddleware } from './middleware-security';
 
 // ============================================
 // 보안 설정
@@ -38,8 +39,6 @@ const SECURITY_CONFIG = {
   
   // 보호된 경로 (인증 필요)
   protectedPaths: [
-    '/editor',
-    '/creator',
     '/admin',
     '/api/admin',
     '/mypage',
@@ -51,6 +50,12 @@ const SECURITY_CONFIG = {
     '/auth',
     '/api/auth',
     '/genspark',
+    '/editor',
+    '/creator',
+    '/agents',
+    '/schedule',
+    '/meeting-notes',
+    '/trends',
   ],
 };
 
@@ -115,6 +120,12 @@ export async function middleware(request: NextRequest) {
   const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
   const userAgent = request.headers.get('user-agent') || '';
 
+  // AI Security Guard - 실시간 위협 감지 및 차단
+  const securityResponse = await securityMiddleware(request);
+  if (securityResponse.status !== 200) {
+    return securityResponse;
+  }
+
   // Rate Limiting
   if (!checkRateLimit(ip)) {
     return new NextResponse('Too Many Requests', { status: 429 });
@@ -142,6 +153,14 @@ export async function middleware(request: NextRequest) {
       const signInUrl = new URL('/auth/signin', request.url);
       signInUrl.searchParams.set('callbackUrl', pathname);
       return NextResponse.redirect(signInUrl);
+    }
+
+    // 관리자 페이지 접근 제어
+    if (pathname.startsWith('/admin')) {
+      // 관리자만 접근 가능
+      if (token.role !== 'admin') {
+        return new NextResponse('Forbidden: 관리자만 접근 가능합니다.', { status: 403 });
+      }
     }
   }
 

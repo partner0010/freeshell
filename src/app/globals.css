@@ -47,6 +47,24 @@
   --color-text-secondary: #404040;
 }
 
+/* 고대비 모드 */
+.high-contrast {
+  --color-background: #000000;
+  --color-background-secondary: #1a1a1a;
+  --color-text: #FFFFFF;
+  --color-text-secondary: #E5E5E5;
+  filter: contrast(1.2);
+}
+
+.high-contrast * {
+  border-color: #FFFFFF !important;
+}
+
+.high-contrast button,
+.high-contrast a {
+  border: 2px solid #FFFFFF !important;
+}
+
 .dark {
   --color-background: #171717;
   --color-background-secondary: #262626;

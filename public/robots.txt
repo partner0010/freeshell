@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://freeshell.ai/sitemap.xml
+
+# 주요 페이지 우선 크롤링
+Allow: /
+Allow: /editor
+Allow: /creator
+Allow: /genspark
+Allow: /agents
+Allow: /trends
+Allow: /community
+Allow: /templates
+Allow: /help
+
+# 관리자 페이지 제외
+Disallow: /admin
+Disallow: /api
+

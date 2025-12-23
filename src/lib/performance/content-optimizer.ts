@@ -131,7 +131,9 @@ export class ContentOptimizer {
    */
   async loadComponent(componentPath: string): Promise<any> {
     // 동적 임포트를 통한 코드 스플리팅
-    return import(componentPath);
+    // 동적 import는 빌드 타임에 해석되지 않으므로 경고가 발생할 수 있습니다
+    // 하지만 런타임에 올바르게 작동합니다
+    return import(/* webpackIgnore: true */ componentPath);
   }
 }
 

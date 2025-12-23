@@ -1,23 +1,58 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Sparkles, Menu, X, Search, 
-  Video, FileText, Zap
+  Video, FileText, Zap, Monitor, Bug, Shield, Accessibility, Users, HelpCircle, FileSignature
 } from 'lucide-react';
+import { NotificationCenter } from '@/components/notifications/NotificationCenter';
+import { LanguageSelector } from '@/components/i18n/LanguageSelector';
+import type { Notification } from '@/components/notifications/NotificationCenter';
 
 export function GlobalHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [showAccessibility, setShowAccessibility] = useState(false);
+
+  useEffect(() => {
+    // 예시 알림 (실제로는 서버에서 받아옴)
+    const exampleNotifications: Notification[] = [
+      {
+        id: '1',
+        type: 'info',
+        title: '새로운 기능이 추가되었습니다!',
+        message: 'AI 채팅에 음성 입력 기능이 추가되었습니다.',
+        timestamp: new Date(),
+        read: false,
+      },
+    ];
+    setNotifications(exampleNotifications);
+  }, []);
+
+  const handleDismiss = (id: string) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
+  };
+
+  const handleRead = (id: string) => {
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+  };
+
+  const handleClearAll = () => {
+    setNotifications([]);
+  };
 
   const mainMenu = [
     { href: '/editor', label: '에디터', icon: FileText, category: '생성' },
     { href: '/creator', label: '콘텐츠 생성', icon: Video, category: '생성' },
     { href: '/genspark', label: 'AI 검색', icon: Search, category: '검색' },
     { href: '/agents', label: 'AI 에이전트', icon: Zap, category: '자동화' },
+    { href: '/signature', label: '전자서명', icon: FileSignature, category: '비즈니스' },
     { href: '/trends', label: '최신 트렌드', icon: Sparkles, category: '기능' },
+    { href: '/community', label: '커뮤니티', icon: Users, category: '소통' },
+    { href: '/help', label: '도움말', icon: HelpCircle, category: '지원' },
   ];
 
   return (
@@ -50,6 +85,26 @@ export function GlobalHeader() {
 
           {/* 우측 액션 */}
           <div className="flex items-center gap-3">
+            {/* 언어 선택 */}
+            <LanguageSelector />
+
+            {/* 접근성 메뉴 */}
+            <button
+              onClick={() => setShowAccessibility(!showAccessibility)}
+              className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-all"
+              aria-label="접근성 설정"
+            >
+              <Accessibility size={18} />
+            </button>
+
+            {/* 알림 센터 */}
+            <NotificationCenter
+              notifications={notifications}
+              onDismiss={handleDismiss}
+              onRead={handleRead}
+              onClearAll={handleClearAll}
+            />
+
             {/* 검색 버튼 */}
             <button
               onClick={() => setIsSearchOpen(true)}
@@ -58,6 +113,33 @@ export function GlobalHeader() {
             >
               <Search size={18} />
             </button>
+
+            {/* 디버깅 메뉴 */}
+            <Link
+              href="/debug"
+              className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg text-gray-700 hover:text-orange-600 hover:bg-orange-50 transition-all font-medium text-sm"
+            >
+              <Bug size={18} />
+              <span>디버깅</span>
+            </Link>
+
+            {/* 사이트 검증 메뉴 */}
+            <Link
+              href="/validate"
+              className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg text-gray-700 hover:text-green-600 hover:bg-green-50 transition-all font-medium text-sm"
+            >
+              <Shield size={18} />
+              <span>사이트 검증</span>
+            </Link>
+
+            {/* 원격 솔루션 메뉴 */}
+            <Link
+              href="/remote"
+              className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all font-medium text-sm"
+            >
+              <Monitor size={18} />
+              <span>원격 솔루션</span>
+            </Link>
 
             {/* 시작하기 버튼 */}
             <Link
@@ -101,6 +183,30 @@ export function GlobalHeader() {
                   <span>{item.label}</span>
                 </Link>
               ))}
+              <Link
+                href="/debug"
+                onClick={() => setIsMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:text-orange-600 hover:bg-orange-50 transition-all font-medium"
+              >
+                <Bug size={20} />
+                <span>디버깅</span>
+              </Link>
+              <Link
+                href="/validate"
+                onClick={() => setIsMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:text-green-600 hover:bg-green-50 transition-all font-medium"
+              >
+                <Shield size={20} />
+                <span>사이트 검증</span>
+              </Link>
+              <Link
+                href="/remote"
+                onClick={() => setIsMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all font-medium"
+              >
+                <Monitor size={20} />
+                <span>원격 솔루션</span>
+              </Link>
               <Link
                 href="/editor"
                 onClick={() => setIsMenuOpen(false)}

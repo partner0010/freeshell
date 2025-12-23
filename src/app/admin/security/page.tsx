@@ -1,535 +1,322 @@
+/**
+ * AI 보안 대시보드
+ * 실시간 위협 감지 및 데이터 유출 모니터링
+ */
+
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Shield,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  RefreshCw,
-  Lock,
-  Unlock,
-  Eye,
-  EyeOff,
-  Globe,
-  Server,
-  Code,
-  FileWarning,
-  Activity,
-  Clock,
-  Download,
-  Search,
-  Filter,
-  ChevronDown,
-  ChevronUp,
-  Info,
-  AlertOctagon,
-} from 'lucide-react';
-import { VulnerabilityScanner, VulnerabilityReport } from '@/lib/security/vulnerability-scanner';
-import { PenetrationTester, PenTestResult } from '@/lib/security/penetration-test';
+import { useEffect, useState } from 'react';
+import { GlobalHeader } from '@/components/layout/GlobalHeader';
 
-export default function SecurityPage() {
-  const [scanning, setScanning] = useState(false);
-  const [penTesting, setPenTesting] = useState(false);
-  const [report, setReport] = useState<VulnerabilityReport | null>(null);
-  const [penTestReport, setPenTestReport] = useState<PenTestResult | null>(null);
-  const [selectedSeverity, setSelectedSeverity] = useState<string>('all');
-  const [expandedVuln, setExpandedVuln] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'vulnerability' | 'pentest'>('vulnerability');
-  
-  // 보안 상태 통계
-  const [securityStats, setSecurityStats] = useState({
-    totalScans: 0,
-    lastScanTime: null as number | null,
-    averageScore: 0,
-    blockedAttacks: 0,
-    activeThreats: 0,
-  });
-  
-  // 실시간 보안 이벤트
-  const [securityEvents, setSecurityEvents] = useState<Array<{
-    id: string;
-    type: string;
-    message: string;
-    timestamp: number;
-    severity: 'info' | 'warning' | 'error';
-  }>>([]);
+interface SecurityLog {
+  id: string;
+  timestamp: Date;
+  ipAddress: string;
+  userAgent: string;
+  endpoint: string;
+  method: string;
+  threatType?: string;
+  severity?: 'low' | 'medium' | 'high' | 'critical';
+  action: 'blocked' | 'monitored' | 'allowed';
+  details: Record<string, any>;
+  dataAccessed?: string[];
+  dataLeaked?: string[];
+}
 
-  // 스캔 실행
-  const runSecurityScan = async () => {
-    setScanning(true);
-    
-    try {
-      const scanner = new VulnerabilityScanner();
-      const result = await scanner.runFullScan();
-      setReport(result);
-      
-      // 통계 업데이트
-      setSecurityStats((prev) => ({
-        ...prev,
-        totalScans: prev.totalScans + 1,
-        lastScanTime: Date.now(),
-        averageScore: Math.round((prev.averageScore * prev.totalScans + result.summary.score) / (prev.totalScans + 1)),
-      }));
-      
-      // 이벤트 추가
-      setSecurityEvents((prev) => [
-        {
-          id: `event-${Date.now()}`,
-          type: 'scan_complete',
-          message: `보안 스캔 완료 - 점수: ${result.summary.score}/100`,
-          timestamp: Date.now(),
-          severity: (result.summary.score >= 80 ? 'info' : result.summary.score >= 50 ? 'warning' : 'error') as 'info' | 'warning' | 'error',
-        },
-        ...prev,
-      ].slice(0, 50));
-    } catch (error) {
-      console.error('스캔 오류:', error);
-    } finally {
-      setScanning(false);
-    }
+interface ThreatStats {
+  total: number;
+  bySeverity: {
+    critical: number;
+    high: number;
+    medium: number;
+    low: number;
   };
-  
-  // 모의해킹 실행
-  const runPenetrationTest = async () => {
-    setPenTesting(true);
-    
-    try {
-      const tester = new PenetrationTester();
-      const result = await tester.runFullPenTest();
-      setPenTestReport(result);
-      
-      // 이벤트 추가
-      setSecurityEvents((prev) => [
-        {
-          id: `event-${Date.now()}`,
-          type: 'pentest_complete',
-          message: `모의해킹 완료 - 점수: ${result.summary.score}/100`,
-          timestamp: Date.now(),
-          severity: (result.summary.score >= 80 ? 'info' : result.summary.score >= 50 ? 'warning' : 'error') as 'info' | 'warning' | 'error',
-        },
-        ...prev,
-      ].slice(0, 50));
-    } catch (error) {
-      console.error('모의해킹 오류:', error);
-    } finally {
-      setPenTesting(false);
-    }
+  byThreatType: Record<string, number>;
+  byAction: {
+    blocked: number;
+    monitored: number;
+    allowed: number;
   };
-  
-  // 시뮬레이션된 실시간 이벤트
+  recent: number;
+}
+
+interface DataBreachReport {
+  id: string;
+  timestamp: Date;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  cause: string;
+  affectedData: string[];
+  affectedUsers: number;
+  detectionMethod: string;
+  status: 'investigating' | 'contained' | 'resolved';
+  remediation: string[];
+  logs: SecurityLog[];
+}
+
+export default function SecurityDashboard() {
+  const [logs, setLogs] = useState<SecurityLog[]>([]);
+  const [stats, setStats] = useState<ThreatStats | null>(null);
+  const [breaches, setBreaches] = useState<DataBreachReport[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedFilter, setSelectedFilter] = useState<string>('all');
+
   useEffect(() => {
-    const events = [
-      { type: 'rate_limit', message: 'Rate Limit 발동 - IP: 203.xxx.xxx.xxx', severity: 'warning' as const },
-      { type: 'login_attempt', message: '로그인 시도 감지 - admin@example.com', severity: 'info' as const },
-      { type: 'bot_blocked', message: '악성 봇 차단됨 - User-Agent: Scrapy', severity: 'warning' as const },
-      { type: 'csrf_check', message: 'CSRF 토큰 검증 통과', severity: 'info' as const },
-      { type: 'xss_blocked', message: 'XSS 공격 시도 차단됨', severity: 'error' as const },
-    ];
-    
-    const interval = setInterval(() => {
-      if (Math.random() > 0.7) {
-        const event = events[Math.floor(Math.random() * events.length)];
-        setSecurityEvents((prev) => [
-          {
-            id: `event-${Date.now()}`,
-            ...event,
-            timestamp: Date.now(),
-          },
-          ...prev,
-        ].slice(0, 50));
-        
-        if (event.severity === 'error') {
-          setSecurityStats((prev) => ({
-            ...prev,
-            blockedAttacks: prev.blockedAttacks + 1,
-          }));
-        }
-      }
-    }, 5000);
-    
+    loadData();
+    // 30초마다 자동 새로고침
+    const interval = setInterval(loadData, 30000);
     return () => clearInterval(interval);
   }, []);
-  
-  // 취약점 필터링
-  const filteredVulnerabilities = report?.vulnerabilities.filter((v) =>
-    selectedSeverity === 'all' ? true : v.severity === selectedSeverity
-  ) || [];
-  
-  // 심각도 색상
-  const getSeverityColor = (severity: string) => {
+
+  const loadData = async () => {
+    try {
+      const [logsRes, statsRes, breachesRes] = await Promise.all([
+        fetch('/api/security/logs?limit=100'),
+        fetch('/api/security/threats'),
+        fetch('/api/security/breaches'),
+      ]);
+
+      if (logsRes.ok) {
+        const logsData = await logsRes.json();
+        setLogs(logsData.logs || []);
+      }
+
+      if (statsRes.ok) {
+        const statsData = await statsRes.json();
+        setStats(statsData.stats);
+      }
+
+      if (breachesRes.ok) {
+        const breachesData = await breachesRes.json();
+        setBreaches(breachesData.reports || []);
+      }
+    } catch (error) {
+      console.error('Failed to load security data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredLogs = logs.filter(log => {
+    if (selectedFilter === 'all') return true;
+    if (selectedFilter === 'blocked') return log.action === 'blocked';
+    if (selectedFilter === 'critical') return log.severity === 'critical';
+    return log.threatType === selectedFilter;
+  });
+
+  const getSeverityColor = (severity?: string) => {
     switch (severity) {
-      case 'critical': return 'text-red-600 bg-red-100 dark:bg-red-900/30';
-      case 'high': return 'text-orange-600 bg-orange-100 dark:bg-orange-900/30';
-      case 'medium': return 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30';
-      case 'low': return 'text-blue-600 bg-blue-100 dark:bg-blue-900/30';
-      case 'info': return 'text-gray-600 bg-gray-100 dark:bg-gray-700/30';
+      case 'critical': return 'text-red-600 bg-red-50';
+      case 'high': return 'text-orange-600 bg-orange-50';
+      case 'medium': return 'text-yellow-600 bg-yellow-50';
+      case 'low': return 'text-blue-600 bg-blue-50';
+      default: return 'text-gray-600 bg-gray-50';
+    }
+  };
+
+  const getActionColor = (action: string) => {
+    switch (action) {
+      case 'blocked': return 'text-red-600 bg-red-100';
+      case 'monitored': return 'text-yellow-600 bg-yellow-100';
+      case 'allowed': return 'text-green-600 bg-green-100';
       default: return 'text-gray-600 bg-gray-100';
     }
   };
-  
-  // 점수 색상
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-500';
-    if (score >= 60) return 'text-yellow-500';
-    if (score >= 40) return 'text-orange-500';
-    return 'text-red-500';
-  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <GlobalHeader />
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">로딩 중...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      {/* 헤더 */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
-            <Shield className="w-8 h-8 text-primary-500" />
-            보안 센터
+    <div className="min-h-screen bg-gray-50">
+      <GlobalHeader />
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            AI 보안 대시보드
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            실시간 보안 모니터링 및 취약점 분석
+          <p className="text-gray-600">
+            실시간 위협 감지 및 데이터 유출 모니터링
           </p>
         </div>
-        
-        <div className="flex gap-3">
-          <button
-            onClick={runSecurityScan}
-            disabled={scanning || penTesting}
-            className="flex items-center gap-2 px-6 py-3 bg-primary-500 text-white rounded-xl hover:bg-primary-600 disabled:opacity-50 transition-colors"
-          >
-            <RefreshCw className={`w-5 h-5 ${scanning ? 'animate-spin' : ''}`} />
-            {scanning ? '스캔 중...' : '취약점 스캔'}
-          </button>
-          
-          <button
-            onClick={runPenetrationTest}
-            disabled={scanning || penTesting}
-            className="flex items-center gap-2 px-6 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 disabled:opacity-50 transition-colors"
-          >
-            <Shield className={`w-5 h-5 ${penTesting ? 'animate-pulse' : ''}`} />
-            {penTesting ? '테스트 중...' : '모의해킹'}
-          </button>
-        </div>
-      </div>
-      
-      {/* 보안 개요 카드 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-soft"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">보안 점수</p>
-              <p className={`text-3xl font-bold ${getScoreColor(report?.summary.score || 0)}`}>
-                {report?.summary.score || '-'}/100
-              </p>
+
+        {/* 통계 카드 */}
+        {stats && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="text-sm text-gray-600 mb-1">전체 위협</div>
+              <div className="text-3xl font-bold text-gray-900">{stats.total}</div>
+              <div className="text-xs text-gray-500 mt-1">최근 1시간: {stats.recent}</div>
             </div>
-            <Shield className="w-12 h-12 text-primary-200" />
-          </div>
-        </motion.div>
-        
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-soft"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">총 스캔</p>
-              <p className="text-3xl font-bold text-gray-800 dark:text-white">
-                {securityStats.totalScans}
-              </p>
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="text-sm text-gray-600 mb-1">차단된 요청</div>
+              <div className="text-3xl font-bold text-red-600">{stats.byAction.blocked}</div>
             </div>
-            <Search className="w-12 h-12 text-blue-200" />
-          </div>
-        </motion.div>
-        
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-soft"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">차단된 공격</p>
-              <p className="text-3xl font-bold text-red-500">
-                {securityStats.blockedAttacks}
-              </p>
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="text-sm text-gray-600 mb-1">Critical 위협</div>
+              <div className="text-3xl font-bold text-red-600">{stats.bySeverity.critical}</div>
             </div>
-            <AlertOctagon className="w-12 h-12 text-red-200" />
-          </div>
-        </motion.div>
-        
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-soft"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">발견된 취약점</p>
-              <p className="text-3xl font-bold text-orange-500">
-                {report?.summary.total || 0}
-              </p>
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="text-sm text-gray-600 mb-1">모니터링 중</div>
+              <div className="text-3xl font-bold text-yellow-600">{stats.byAction.monitored}</div>
             </div>
-            <AlertTriangle className="w-12 h-12 text-orange-200" />
           </div>
-        </motion.div>
-        
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-soft"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">마지막 스캔</p>
-              <p className="text-lg font-bold text-gray-800 dark:text-white">
-                {securityStats.lastScanTime
-                  ? new Date(securityStats.lastScanTime).toLocaleTimeString()
-                  : '-'}
-              </p>
+        )}
+
+        {/* 데이터 유출 보고서 */}
+        {breaches.length > 0 && (
+          <div className="bg-white rounded-lg shadow mb-8">
+            <div className="p-6 border-b">
+              <h2 className="text-xl font-bold text-gray-900">데이터 유출 보고서</h2>
             </div>
-            <Clock className="w-12 h-12 text-green-200" />
-          </div>
-        </motion.div>
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* 취약점 목록 */}
-        <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl shadow-soft overflow-hidden">
-          <div className="p-6 border-b border-gray-100 dark:border-gray-700">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
-                취약점 분석 결과
-              </h2>
-              
-              <div className="flex items-center gap-2">
-                <Filter className="w-4 h-4 text-gray-400" />
-                <select
-                  value={selectedSeverity}
-                  onChange={(e) => setSelectedSeverity(e.target.value)}
-                  className="text-sm border rounded-lg px-3 py-1.5 dark:bg-gray-700 dark:border-gray-600"
-                >
-                  <option value="all">모든 심각도</option>
-                  <option value="critical">심각</option>
-                  <option value="high">높음</option>
-                  <option value="medium">중간</option>
-                  <option value="low">낮음</option>
-                  <option value="info">정보</option>
-                </select>
-              </div>
-            </div>
-            
-            {/* 심각도 요약 */}
-            {report && (
-              <div className="flex gap-2 mt-4">
-                <span className="px-2 py-1 text-xs rounded-full bg-red-100 text-red-600 dark:bg-red-900/30">
-                  심각: {report.summary.critical}
-                </span>
-                <span className="px-2 py-1 text-xs rounded-full bg-orange-100 text-orange-600 dark:bg-orange-900/30">
-                  높음: {report.summary.high}
-                </span>
-                <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30">
-                  중간: {report.summary.medium}
-                </span>
-                <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30">
-                  낮음: {report.summary.low}
-                </span>
-                <span className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600 dark:bg-gray-700">
-                  정보: {report.summary.info}
-                </span>
-              </div>
-            )}
-          </div>
-          
-          <div className="divide-y divide-gray-100 dark:divide-gray-700 max-h-[500px] overflow-y-auto">
-            {filteredVulnerabilities.length > 0 ? (
-              filteredVulnerabilities.map((vuln) => (
-                <motion.div
-                  key={vuln.id}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-                >
-                  <div
-                    className="flex items-start justify-between cursor-pointer"
-                    onClick={() => setExpandedVuln(expandedVuln === vuln.id ? null : vuln.id)}
-                  >
-                    <div className="flex items-start gap-3">
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${getSeverityColor(vuln.severity)}`}>
-                        {vuln.severity.toUpperCase()}
+            <div className="p-6">
+              {breaches.map((breach) => (
+                <div key={breach.id} className="mb-4 p-4 border rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2 py-1 rounded text-sm font-medium ${getSeverityColor(breach.severity)}`}>
+                        {breach.severity.toUpperCase()}
                       </span>
-                      <div>
-                        <h3 className="font-medium text-gray-800 dark:text-white">
-                          {vuln.title}
-                        </h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                          {vuln.description}
-                        </p>
-                      </div>
+                      <span className="text-sm text-gray-600">
+                        {new Date(breach.timestamp).toLocaleString('ko-KR')}
+                      </span>
                     </div>
-                    
-                    {expandedVuln === vuln.id ? (
-                      <ChevronUp className="w-5 h-5 text-gray-400" />
-                    ) : (
-                      <ChevronDown className="w-5 h-5 text-gray-400" />
-                    )}
+                    <span className={`px-2 py-1 rounded text-sm ${
+                      breach.status === 'resolved' ? 'bg-green-100 text-green-800' :
+                      breach.status === 'contained' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      {breach.status === 'investigating' ? '조사 중' :
+                       breach.status === 'contained' ? '차단됨' : '해결됨'}
+                    </span>
                   </div>
-                  
-                  <AnimatePresence>
-                    {expandedVuln === vuln.id && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="mt-4 pl-12 space-y-3"
-                      >
-                        <div>
-                          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">해결 방법</h4>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">{vuln.remediation}</p>
-                        </div>
-                        
-                        {vuln.cwe && (
-                          <div className="flex gap-4 text-xs">
-                            <span className="text-gray-500">CWE: {vuln.cwe}</span>
-                            {vuln.owasp && <span className="text-gray-500">OWASP: {vuln.owasp}</span>}
-                          </div>
-                        )}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
-              ))
-            ) : (
-              <div className="p-12 text-center text-gray-500 dark:text-gray-400">
-                {report ? '해당 심각도의 취약점이 없습니다.' : '보안 스캔을 실행하여 취약점을 분석하세요.'}
-              </div>
-            )}
-          </div>
-        </div>
-        
-        {/* 실시간 이벤트 */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-soft overflow-hidden">
-          <div className="p-6 border-b border-gray-100 dark:border-gray-700">
-            <h2 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
-              <Activity className="w-5 h-5 text-green-500" />
-              실시간 보안 이벤트
-            </h2>
-          </div>
-          
-          <div className="divide-y divide-gray-100 dark:divide-gray-700 max-h-[500px] overflow-y-auto">
-            {securityEvents.map((event) => (
-              <motion.div
-                key={event.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="p-4"
-              >
-                <div className="flex items-start gap-3">
-                  {event.severity === 'error' ? (
-                    <XCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                  ) : event.severity === 'warning' ? (
-                    <AlertTriangle className="w-5 h-5 text-yellow-500 flex-shrink-0" />
-                  ) : (
-                    <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                  )}
-                  
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-800 dark:text-white">
-                      {event.message}
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      {new Date(event.timestamp).toLocaleTimeString()}
-                    </p>
+                  <div className="mb-2">
+                    <div className="font-medium text-gray-900 mb-1">원인:</div>
+                    <div className="text-sm text-gray-700">{breach.cause}</div>
+                  </div>
+                  <div className="mb-2">
+                    <div className="font-medium text-gray-900 mb-1">유출된 데이터:</div>
+                    <div className="flex flex-wrap gap-2">
+                      {breach.affectedData.map((data, idx) => (
+                        <span key={idx} className="px-2 py-1 bg-red-100 text-red-800 rounded text-sm">
+                          {data}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="mb-2">
+                    <div className="font-medium text-gray-900 mb-1">대응 방안:</div>
+                    <ul className="list-disc list-inside text-sm text-gray-700">
+                      {breach.remediation.map((action, idx) => (
+                        <li key={idx}>{action}</li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
-              </motion.div>
-            ))}
-            
-            {securityEvents.length === 0 && (
-              <div className="p-12 text-center text-gray-500 dark:text-gray-400">
-                보안 이벤트가 없습니다.
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 보안 로그 */}
+        <div className="bg-white rounded-lg shadow">
+          <div className="p-6 border-b">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-gray-900">보안 로그</h2>
+              <div className="flex gap-2">
+                <select
+                  value={selectedFilter}
+                  onChange={(e) => setSelectedFilter(e.target.value)}
+                  className="px-3 py-2 border rounded-lg text-sm"
+                >
+                  <option value="all">전체</option>
+                  <option value="blocked">차단됨</option>
+                  <option value="critical">Critical</option>
+                  <option value="sql_injection">SQL Injection</option>
+                  <option value="xss">XSS</option>
+                  <option value="ddos">DDoS</option>
+                  <option value="data_exfiltration">데이터 유출</option>
+                </select>
+                <button
+                  onClick={loadData}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
+                >
+                  새로고침
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">시간</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">IP 주소</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">엔드포인트</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">위협 유형</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">심각도</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">조치</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">상세</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredLogs.map((log) => (
+                  <tr key={log.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {new Date(log.timestamp).toLocaleString('ko-KR')}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {log.ipAddress}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {log.method} {log.endpoint}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {log.threatType || '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {log.severity && (
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${getSeverityColor(log.severity)}`}>
+                          {log.severity.toUpperCase()}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${getActionColor(log.action)}`}>
+                        {log.action === 'blocked' ? '차단됨' :
+                         log.action === 'monitored' ? '모니터링' : '허용됨'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-500">
+                      {log.dataLeaked && log.dataLeaked.length > 0 && (
+                        <div className="text-red-600">
+                          유출: {log.dataLeaked.join(', ')}
+                        </div>
+                      )}
+                      {log.dataAccessed && log.dataAccessed.length > 0 && (
+                        <div className="text-blue-600">
+                          접근: {log.dataAccessed.join(', ')}
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {filteredLogs.length === 0 && (
+              <div className="p-8 text-center text-gray-500">
+                로그가 없습니다
               </div>
             )}
           </div>
         </div>
-      </div>
-      
-      {/* 보안 권장사항 */}
-      {report && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-r from-primary-50 to-pastel-lavender dark:from-primary-900/20 dark:to-primary-800/20 rounded-2xl p-6"
-        >
-          <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
-            <Info className="w-5 h-5 text-primary-500" />
-            보안 권장사항
-          </h2>
-          
-          <ul className="space-y-2">
-            {report.recommendations.map((rec, index) => (
-              <li key={index} className="flex items-start gap-2 text-gray-700 dark:text-gray-300">
-                <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                <span>{rec}</span>
-              </li>
-            ))}
-          </ul>
-        </motion.div>
-      )}
-      
-      {/* 보안 기능 상태 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { name: 'XSS 방어', icon: Code, status: 'active', description: 'HTML 살균 및 CSP 적용' },
-          { name: 'CSRF 보호', icon: Lock, status: 'active', description: 'CSRF 토큰 검증' },
-          { name: 'Rate Limiting', icon: Activity, status: 'active', description: '분당 100회 제한' },
-          { name: 'SQL Injection 방어', icon: Server, status: 'active', description: '입력 검증 및 이스케이프' },
-          { name: 'DDoS 방어', icon: Globe, status: 'active', description: 'IP 기반 트래픽 제한' },
-          { name: 'HTTPS', icon: Lock, status: 'dev', description: '개발 환경 (프로덕션에서 필수)' },
-          { name: '2단계 인증', icon: Shield, status: 'ready', description: '구현 완료, 활성화 필요' },
-          { name: '세션 보안', icon: Eye, status: 'active', description: '만료 및 비활성 타임아웃' },
-        ].map((feature, index) => (
-          <motion.div
-            key={feature.name}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: index * 0.05 }}
-            className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-soft"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <feature.icon className="w-5 h-5 text-primary-500" />
-                <span className="font-medium text-gray-800 dark:text-white">{feature.name}</span>
-              </div>
-              
-              <span
-                className={`px-2 py-0.5 text-xs rounded-full ${
-                  feature.status === 'active'
-                    ? 'bg-green-100 text-green-600 dark:bg-green-900/30'
-                    : feature.status === 'ready'
-                    ? 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30'
-                    : 'bg-gray-100 text-gray-600 dark:bg-gray-700'
-                }`}
-              >
-                {feature.status === 'active' ? '활성' : feature.status === 'ready' ? '준비됨' : '개발'}
-              </span>
-            </div>
-            
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {feature.description}
-            </p>
-          </motion.div>
-        ))}
       </div>
     </div>
   );
 }
-

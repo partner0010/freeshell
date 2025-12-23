@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import {
   Save,
   Download,
@@ -15,7 +16,13 @@ import {
   Calendar,
   Folder,
   Filter,
+  Gift,
+  BarChart3,
+  Layers,
+  Shield,
 } from 'lucide-react';
+import { UserAnalytics } from '@/components/analytics/UserAnalytics';
+import { TemplateMarketplace } from '@/components/templates/TemplateMarketplace';
 
 interface SavedItem {
   id: string;
@@ -30,6 +37,7 @@ interface SavedItem {
 export default function MyPage() {
   const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
   const [filter, setFilter] = useState<'all' | 'signature' | 'voice-memo' | 'code-analysis' | 'project'>('all');
+  const [activeTab, setActiveTab] = useState<'saved' | 'analytics' | 'templates'>('saved');
 
   // 로컬 스토리지에서 불러오기
   React.useEffect(() => {
@@ -121,11 +129,75 @@ export default function MyPage() {
       {/* 헤더 */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-6 py-6">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">마이페이지</h1>
-          <p className="text-gray-500">저장된 작업물을 관리하세요</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-800 mb-2">마이페이지</h1>
+              <p className="text-gray-500">저장된 작업물을 관리하세요</p>
+            </div>
+            <div className="flex gap-3">
+              <Link
+                href="/mypage/benefits"
+                className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all flex items-center gap-2"
+              >
+                <Gift size={20} />
+                <span>회원 혜택 보기</span>
+              </Link>
+              <Link
+                href="/mypage/security"
+                className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all flex items-center gap-2"
+              >
+                <Shield size={20} />
+                <span>보안 설정</span>
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
 
+      {/* 탭 메뉴 */}
+      <div className="max-w-7xl mx-auto px-6 py-4 border-b border-gray-200">
+        <div className="flex gap-2">
+          {[
+            { id: 'saved', label: '저장된 항목', icon: Save },
+            { id: 'analytics', label: '분석', icon: BarChart3 },
+            { id: 'templates', label: '템플릿', icon: Layers },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`px-6 py-3 font-medium transition-colors border-b-2 ${
+                  activeTab === tab.id
+                    ? 'border-purple-600 text-purple-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <Icon size={18} className="inline mr-2" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 분석 탭 */}
+      {activeTab === 'analytics' && (
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <UserAnalytics />
+        </div>
+      )}
+
+      {/* 템플릿 탭 */}
+      {activeTab === 'templates' && (
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <TemplateMarketplace />
+        </div>
+      )}
+
+      {/* 저장된 항목 탭 */}
+      {activeTab === 'saved' && (
+        <>
       {/* 필터 */}
       <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex items-center gap-2 flex-wrap">
@@ -267,6 +339,8 @@ export default function MyPage() {
           </div>
         )}
       </div>
+      </>
+      )}
     </div>
   );
 }

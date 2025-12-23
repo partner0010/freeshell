@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Video, Image, BookOpen, FileText, Mic, Sparkles,
-  Play, Download, Globe, Zap, Settings, ArrowRight, Calendar, Clock
+  Play, Download, Globe, Zap, Settings, ArrowRight, Calendar, Clock, Layers, CheckSquare
 } from 'lucide-react';
 import Link from 'next/link';
 import { GlobalHeader } from '@/components/layout/GlobalHeader';
@@ -16,6 +16,8 @@ export default function CreatorPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [batchMode, setBatchMode] = useState(false);
+  const [batchTopics, setBatchTopics] = useState<string[]>(['']);
 
   const contentTypes = [
     {
@@ -176,11 +178,76 @@ export default function CreatorPage() {
               placeholder="예: AI로 시작하는 부업, 오늘의 이슈, 요리 레시피 등..."
               className="w-full h-32 px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none resize-none text-gray-900"
             />
-            <div className="mt-4 flex items-center gap-4">
+            <div className="mt-4 space-y-4">
+              {/* 배치 모드 토글 */}
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => {
+                    setBatchMode(!batchMode);
+                    if (!batchMode) {
+                      setBatchTopics(['']);
+                    } else {
+                      setBatchTopics([topic]);
+                      setTopic('');
+                    }
+                  }}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all ${
+                    batchMode
+                      ? 'border-purple-500 bg-purple-50 text-purple-700'
+                      : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
+                  }`}
+                >
+                  <Layers size={18} />
+                  배치 생성 모드
+                </button>
+                {batchMode && (
+                  <span className="text-sm text-gray-600">
+                    여러 주제를 한 번에 생성할 수 있습니다
+                  </span>
+                )}
+              </div>
+
+              {/* 배치 모드 입력 */}
+              {batchMode && (
+                <div className="space-y-2">
+                  {batchTopics.map((batchTopic, idx) => (
+                    <div key={idx} className="flex gap-2">
+                      <input
+                        type="text"
+                        value={batchTopic}
+                        onChange={(e) => {
+                          const newTopics = [...batchTopics];
+                          newTopics[idx] = e.target.value;
+                          setBatchTopics(newTopics);
+                        }}
+                        placeholder={`주제 ${idx + 1}을 입력하세요...`}
+                        className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none"
+                      />
+                      {batchTopics.length > 1 && (
+                        <button
+                          onClick={() => {
+                            setBatchTopics(batchTopics.filter((_, i) => i !== idx));
+                          }}
+                          className="px-4 py-3 bg-red-100 text-red-700 rounded-xl hover:bg-red-200"
+                        >
+                          삭제
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  <button
+                    onClick={() => setBatchTopics([...batchTopics, ''])}
+                    className="w-full px-4 py-2 border-2 border-dashed border-gray-300 rounded-xl text-gray-600 hover:border-purple-500 hover:text-purple-600"
+                  >
+                    + 주제 추가
+                  </button>
+                </div>
+              )}
+
               <button
                 onClick={handleGenerate}
-                disabled={!topic.trim() || isGenerating}
-                className="flex-1 px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                disabled={(!topic.trim() && !batchMode) || (batchMode && batchTopics.every(t => !t.trim())) || isGenerating}
+                className="w-full px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isGenerating ? (
                   <>

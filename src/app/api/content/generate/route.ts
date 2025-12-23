@@ -9,14 +9,12 @@ import { ContentOptimizer } from '@/lib/performance/content-optimizer';
 
 export async function POST(request: NextRequest) {
   try {
-    const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
+    // 회원가입 없이 사용 가능하도록 인증 제거 (선택사항)
+    // const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
+    // const userId = token?.id || 'anonymous';
     
-    if (!token || !token.id) {
-      return NextResponse.json(
-        { error: '인증이 필요합니다.' },
-        { status: 401 }
-      );
-    }
+    // 임시로 익명 사용자 허용
+    const userId = 'anonymous';
 
     const { contentType, topic, options } = await request.json();
 
@@ -81,7 +79,7 @@ export async function POST(request: NextRequest) {
         const chapters = generator.generateStructure(topic, 10);
         const ebook = await generator.generateEbook({
           title: `${topic} 가이드`,
-          author: token.name || 'Freeshell 사용자',
+          author: 'Freeshell 사용자',
           chapters,
           coverDesign: {
             style: 'modern',
@@ -158,7 +156,7 @@ export async function POST(request: NextRequest) {
 
     // 보안 적용
     const contentId = `content-${Date.now()}`;
-    const security = securityManager.secureContent(contentId, token.id as string, {
+    const security = securityManager.secureContent(contentId, userId, {
       encryption: true,
       watermark: true,
       drm: false,
@@ -166,7 +164,7 @@ export async function POST(request: NextRequest) {
       auditLog: true,
     });
 
-    securityManager.logSecurityEvent('content_created', contentId, token.id as string, {
+    securityManager.logSecurityEvent('content_created', contentId, userId, {
       contentType,
       topic,
     });
@@ -181,14 +179,29 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    return NextResponse.json({
+    const responseData = {
       success: true,
       data: {
         ...result,
         security,
         optimized: true,
       },
-    });
+    };
+
+    // 도메인별 학습 시스템에 상호작용 기록
+    try {
+      const { domainLearningSystem } = await import('@/lib/ai/domain-specific-learning');
+      domainLearningSystem.recordInteraction('content', {
+        action: 'generate-content',
+        input: `${contentType}: ${topic}`,
+        output: JSON.stringify(responseData),
+        feedback: undefined,
+      });
+    } catch (error) {
+      console.error('학습 기록 실패:', error);
+    }
+
+    return NextResponse.json(responseData);
   } catch (error: any) {
     console.error('콘텐츠 생성 오류:', error);
     return NextResponse.json(

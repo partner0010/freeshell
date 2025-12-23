@@ -1,85 +1,71 @@
 @echo off
 chcp 65001 >nul
 echo ========================================
-echo 프로젝트 정리 스크립트
+echo 프로젝트 폴더 정리 스크립트
 echo ========================================
 echo.
 
-cd /d "%~dp0"
+cd /d "%~dp0\.."
+
+echo 현재 위치: %CD%
+echo.
+
+echo [1단계] 불필요한 파일 확인 중...
+echo.
+
+REM .github 폴더의 backup 폴더 확인
+if exist ".github\backup" (
+    echo .github\backup 폴더 발견
+    echo 이 폴더는 백업용이므로 유지합니다.
+)
+
+REM 임시 파일 삭제
+echo [2단계] 임시 파일 삭제 중...
+del /q /s /f "*.tmp" 2>nul
+del /q /s /f "*.log" 2>nul
+del /q /s /f "*.cache" 2>nul
+del /q /s /f "*.swp" 2>nul
+del /q /s /f "*.swo" 2>nul
+del /q /s /f "*~" 2>nul
+del /q /s /f ".DS_Store" 2>nul
+del /q /s /f "Thumbs.db" 2>nul
+echo 임시 파일 삭제 완료
+echo.
+
+REM 빌드 산출물 삭제 (필요시)
+echo [3단계] 빌드 산출물 확인 중...
+if exist ".next" (
+    echo .next 폴더 발견 (Next.js 빌드 산출물)
+    echo 이 폴더는 빌드 시 자동 생성되므로 유지합니다.
+)
+echo.
+
+REM 불필요한 문서 파일 확인
+echo [4단계] 중복 문서 파일 확인 중...
+if exist "새 텍스트 문서.txt" (
+    echo "새 텍스트 문서.txt" 삭제 중...
+    del /q "새 텍스트 문서.txt"
+    echo 삭제 완료
+)
+
+if exist "troubleshoot.html" (
+    echo troubleshoot.html 삭제 중...
+    del /q "troubleshoot.html"
+    echo 삭제 완료
+)
+echo.
+
+REM .github 폴더의 중복 가이드 파일 정리
+echo [5단계] .github 폴더 정리 중...
+cd .github
+if exist "backup" (
+    echo backup 폴더는 백업용이므로 유지합니다.
+)
 cd ..
-
-echo [1/5] 현재 상태 확인...
-echo.
-echo .github 폴더의 파일 수:
-dir /b .github\*.md 2>nul | find /c /v ""
-echo 개의 .md 파일
-dir /b .github\*.bat 2>nul | find /c /v ""
-echo 개의 .bat 파일
 echo.
 
-echo [2/5] 백업 폴더 생성...
-if not exist ".github\backup" mkdir .github\backup
-echo ✅ 백업 폴더 생성 완료
-echo.
-
-echo [3/5] 핵심 파일만 남기고 나머지 .md 파일 백업...
-echo.
-echo 보존할 파일:
-echo   - 통합_README.md
-echo   - 프로젝트_정리_계획.md
-echo   - 프로젝트_정리_스크립트.bat
-echo.
-set /p CONFIRM="다른 .md 파일들을 백업 폴더로 이동하시겠습니까? (Y/N): "
-if /i "%CONFIRM%"=="Y" (
-    for %%f in (.github\*.md) do (
-        if not "%%~nf"=="통합_README" (
-            if not "%%~nf"=="프로젝트_정리_계획" (
-                move "%%f" ".github\backup\" >nul 2>&1
-                echo ✅ %%f 백업 완료
-            )
-        )
-    )
-    echo.
-    echo ✅ .md 파일 정리 완료
-) else (
-    echo 건너뜀
-)
-echo.
-
-echo [4/5] 핵심 파일만 남기고 나머지 .bat 파일 백업...
-echo.
-echo 보존할 파일:
-echo   - 프로젝트_정리_스크립트.bat
-echo   - 최종_해결_방법_자동화.bat
-echo.
-set /p CONFIRM2="다른 .bat 파일들을 백업 폴더로 이동하시겠습니까? (Y/N): "
-if /i "%CONFIRM2%"=="Y" (
-    for %%f in (.github\*.bat) do (
-        if not "%%~nf"=="프로젝트_정리_스크립트" (
-            if not "%%~nf"=="최종_해결_방법_자동화" (
-                move "%%f" ".github\backup\" >nul 2>&1
-                echo ✅ %%f 백업 완료
-            )
-        )
-    )
-    echo.
-    echo ✅ .bat 파일 정리 완료
-) else (
-    echo 건너뜀
-)
-echo.
-
-echo [5/5] 정리 결과 확인...
-echo.
-echo .github 폴더의 남은 파일:
-dir /b .github\*.md 2>nul
-dir /b .github\*.bat 2>nul
-echo.
-echo 백업 폴더의 파일:
-dir /b .github\backup\*.md 2>nul | find /c /v ""
-echo 개의 .md 파일
-dir /b .github\backup\*.bat 2>nul | find /c /v ""
-echo 개의 .bat 파일
+echo [6단계] Git 상태 확인 중...
+git status --short
 echo.
 
 echo ========================================
@@ -87,8 +73,8 @@ echo 정리 완료!
 echo ========================================
 echo.
 echo 다음 단계:
-echo 1. Git에 커밋 및 푸시
-echo 2. Vercel에서 재배포
+echo 1. 변경사항 확인: git status
+echo 2. 변경사항 커밋: git add . ^&^& git commit -m "프로젝트 정리"
+echo 3. GitHub에 푸시: git push
 echo.
 pause
-

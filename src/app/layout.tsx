@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { Providers } from './providers'
+import { StructuredData } from '@/components/seo/StructuredData'
 
 export const metadata: Metadata = {
   title: 'Freeshell - AI 통합 콘텐츠 생성 솔루션',
@@ -46,6 +47,11 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+        <link rel="robots" href="/robots.txt" />
+        {/* 구조화된 데이터 */}
+        <StructuredData type="Organization" data={{}} />
+        <StructuredData type="WebSite" data={{}} />
       </head>
       <body className="antialiased">
         <Providers>

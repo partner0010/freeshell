@@ -31,9 +31,10 @@ interface VoiceMemo {
 interface VoiceTranslationProps {
   onSave?: (memos: VoiceMemo[]) => void;
   onExport?: (memos: VoiceMemo[]) => void;
+  defaultMinimized?: boolean;
 }
 
-export function VoiceTranslation({ onSave, onExport }: VoiceTranslationProps) {
+export function VoiceTranslation({ onSave, onExport, defaultMinimized = false }: VoiceTranslationProps) {
   const [isListening, setIsListening] = useState(false);
   const [inputLanguage, setInputLanguage] = useState<string>('ko-KR');
   const [outputLanguage, setOutputLanguage] = useState<string>('en-US');
@@ -43,6 +44,8 @@ export function VoiceTranslation({ onSave, onExport }: VoiceTranslationProps) {
   const [draggedMemo, setDraggedMemo] = useState<{ x: number; y: number } | null>(null);
   const [opacity, setOpacity] = useState(0.8);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(defaultMinimized);
+  const [isHidden, setIsHidden] = useState(false);
 
   const recognitionRef = useRef<any>(null);
   const synthesisRef = useRef<SpeechSynthesis | null>(null);
@@ -321,31 +324,54 @@ export function VoiceTranslation({ onSave, onExport }: VoiceTranslationProps) {
     { code: 'de-DE', name: '독일어' },
   ];
 
+  if (isHidden) {
+    return (
+      <motion.button
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        onClick={() => setIsHidden(false)}
+        className="fixed bottom-4 right-4 z-[150] w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform"
+        title="음성 번역 메모 표시"
+      >
+        <Mic size={20} />
+      </motion.button>
+    );
+  }
+
   return (
     <>
       {/* 음성 인식 컨트롤 패널 */}
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className={`fixed ${isExpanded ? 'bottom-4 left-4 right-4' : 'bottom-4 right-4'} z-[150] bg-white rounded-xl shadow-2xl border max-w-md`}
+        className={`fixed ${isExpanded ? 'bottom-4 left-4 right-4' : 'bottom-4 right-4'} z-[150] bg-white rounded-xl shadow-2xl border ${isMinimized ? 'max-w-xs' : 'max-w-md'}`}
       >
         {/* 헤더 */}
         <div className="p-4 border-b flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Mic className="text-primary-600" size={20} />
-            <h3 className="font-bold text-gray-800">음성 번역 메모</h3>
+            {!isMinimized && <h3 className="font-bold text-gray-800">음성 번역 메모</h3>}
           </div>
           <div className="flex items-center gap-1">
             <button
-              onClick={() => setIsExpanded(!isExpanded)}
+              onClick={() => setIsMinimized(!isMinimized)}
               className="p-1.5 hover:bg-gray-100 rounded-lg"
+              title={isMinimized ? '확장' : '최소화'}
             >
-              {isExpanded ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+              {isMinimized ? <Maximize2 size={16} /> : <Minimize2 size={16} />}
+            </button>
+            <button
+              onClick={() => setIsHidden(true)}
+              className="p-1.5 hover:bg-gray-100 rounded-lg"
+              title="숨기기"
+            >
+              <X size={16} />
             </button>
           </div>
         </div>
 
         {/* 컨트롤 */}
+        {!isMinimized && (
         <div className="p-4 space-y-3">
           {/* 언어 선택 */}
           <div className="grid grid-cols-2 gap-2">
@@ -440,6 +466,33 @@ export function VoiceTranslation({ onSave, onExport }: VoiceTranslationProps) {
             </button>
           </div>
         </div>
+        )}
+        
+        {/* 최소화 상태일 때 간단한 버튼만 표시 */}
+        {isMinimized && (
+          <div className="p-2">
+            <button
+              onClick={toggleListening}
+              className={`w-full py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
+                isListening
+                  ? 'bg-red-600 text-white hover:bg-red-700'
+                  : 'bg-primary-600 text-white hover:bg-primary-700'
+              }`}
+            >
+              {isListening ? (
+                <>
+                  <MicOff size={16} />
+                  <span className="text-xs">중지</span>
+                </>
+              ) : (
+                <>
+                  <Mic size={16} />
+                  <span className="text-xs">시작</span>
+                </>
+              )}
+            </button>
+          </div>
+        )}
       </motion.div>
 
       {/* 현재 인식 중인 메모 */}

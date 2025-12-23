@@ -1,187 +1,100 @@
+/**
+ * 성능 최적화 컴포넌트
+ * 코드 분할, 지연 로딩, 이미지 최적화
+ */
+
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { motion } from 'framer-motion';
-import {
-  Zap,
-  Gauge,
-  TrendingDown,
-  CheckCircle2,
-  AlertTriangle,
-  RefreshCw,
-  Download,
-} from 'lucide-react';
-import {
-  getMemoryUsage,
-  detectMemoryLeaks,
-  measurePerformance,
-  BatchUpdater,
-} from '@/lib/performance/optimizer';
-
-interface PerformanceMetric {
-  name: string;
-  value: number;
-  unit: string;
-  status: 'good' | 'warning' | 'critical';
-  recommendation?: string;
-}
+import React, { useEffect, useState } from 'react';
+import { Zap, CheckCircle, AlertCircle } from 'lucide-react';
 
 export function PerformanceOptimizer() {
-  const [metrics, setMetrics] = useState<PerformanceMetric[]>([]);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [optimizations, setOptimizations] = useState<string[]>([]);
+  const [metrics, setMetrics] = useState({
+    loadTime: 0,
+    renderTime: 0,
+    resourceCount: 0,
+    totalSize: 0,
+  });
 
   useEffect(() => {
-    analyzePerformance();
-    const interval = setInterval(analyzePerformance, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const analyzePerformance = useCallback(() => {
-    setIsAnalyzing(true);
-
-    // 성능 측정
-    const measuredMetrics = measurePerformance('full-analysis', () => {
-      const memory = getMemoryUsage();
-      const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+    if (typeof window !== 'undefined' && 'performance' in window) {
+      const perfData = window.performance.timing;
+      const loadTime = perfData.loadEventEnd - perfData.navigationStart;
+      const renderTime = perfData.domContentLoadedEventEnd - perfData.navigationStart;
       
-      return [
-        {
-          name: '페이지 로드 시간',
-          value: navigation ? (navigation.loadEventEnd - navigation.fetchStart) / 1000 : 0,
-          unit: '초',
-          status: navigation && (navigation.loadEventEnd - navigation.fetchStart) < 2000 ? 'good' : 'warning',
-          recommendation: navigation && (navigation.loadEventEnd - navigation.fetchStart) > 2000 
-            ? '코드 스플리팅 및 레이지 로딩 적용 권장' 
-            : undefined,
-        },
-        {
-          name: '메모리 사용량',
-          value: memory.percentage,
-          unit: '%',
-          status: memory.percentage < 70 ? 'good' : memory.percentage < 85 ? 'warning' : 'critical',
-          recommendation: memory.percentage > 70 
-            ? '메모리 누수 확인 및 불필요한 객체 정리 권장' 
-            : undefined,
-        },
-        {
-          name: 'FPS',
-          value: 60, // 실제로는 측정 필요
-          unit: 'fps',
-          status: 60 >= 60 ? 'good' : 60 >= 30 ? 'warning' : 'critical',
-          recommendation: 60 < 60 
-            ? '애니메이션 최적화 및 GPU 가속 활용 권장' 
-            : undefined,
-        },
-        {
-          name: '번들 크기',
-          value: 500, // 실제로는 측정 필요
-          unit: 'KB',
-          status: 500 < 500 ? 'good' : 500 < 1000 ? 'warning' : 'critical',
-          recommendation: 500 > 500 
-            ? '코드 스플리팅 및 트리 쉐이킹 적용 권장' 
-            : undefined,
-        },
-      ] as PerformanceMetric[];
-    });
+      const resources = window.performance.getEntriesByType('resource');
+      const totalSize = resources.reduce((sum, resource: any) => {
+        return sum + (resource.transferSize || 0);
+      }, 0);
 
-    setMetrics(measuredMetrics);
-
-    // 최적화 제안
-    const suggestions: string[] = [];
-    measuredMetrics.forEach((metric) => {
-      if (metric.recommendation) {
-        suggestions.push(`${metric.name}: ${metric.recommendation}`);
-      }
-    });
-
-    setOptimizations(suggestions);
-    setIsAnalyzing(false);
+      setMetrics({
+        loadTime: Math.round(loadTime),
+        renderTime: Math.round(renderTime),
+        resourceCount: resources.length,
+        totalSize: Math.round(totalSize / 1024), // KB
+      });
+    }
   }, []);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'good':
-        return 'text-green-600 bg-green-50 border-green-200';
-      case 'warning':
-        return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-      case 'critical':
-        return 'text-red-600 bg-red-50 border-red-200';
-      default:
-        return 'text-gray-600 bg-gray-50 border-gray-200';
-    }
+  const getPerformanceGrade = (loadTime: number) => {
+    if (loadTime < 1000) return { grade: 'A+', color: 'green' };
+    if (loadTime < 2000) return { grade: 'A', color: 'green' };
+    if (loadTime < 3000) return { grade: 'B', color: 'yellow' };
+    if (loadTime < 5000) return { grade: 'C', color: 'orange' };
+    return { grade: 'D', color: 'red' };
   };
 
+  const grade = getPerformanceGrade(metrics.loadTime);
+
   return (
-    <div className="h-full flex flex-col bg-white">
-      {/* 헤더 */}
-      <div className="p-6 border-b">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-emerald-600 rounded-xl flex items-center justify-center">
-              <Zap className="text-white" size={24} />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-gray-800">성능 최적화</h2>
-              <p className="text-sm text-gray-500">실시간 성능 모니터링 및 최적화</p>
-            </div>
-          </div>
-          <button
-            onClick={analyzePerformance}
-            disabled={isAnalyzing}
-            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 flex items-center gap-2"
-          >
-            <RefreshCw size={16} className={isAnalyzing ? 'animate-spin' : ''} />
-            재분석
-          </button>
+    <div className="bg-white rounded-xl border border-gray-200 p-6">
+      <div className="flex items-center gap-3 mb-4">
+        <Zap className="text-yellow-600" size={24} />
+        <div>
+          <h3 className="font-bold text-gray-900">성능 모니터링</h3>
+          <p className="text-sm text-gray-600">실시간 성능 지표</p>
         </div>
       </div>
 
-      {/* 메트릭 */}
-      <div className="flex-1 overflow-auto p-6">
-        <div className="grid grid-cols-2 gap-4 mb-6">
-          {metrics.map((metric, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.1 }}
-              className={`p-4 border-2 rounded-xl ${getStatusColor(metric.status)}`}
-            >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-gray-700">{metric.name}</span>
-                {metric.status === 'good' ? (
-                  <CheckCircle2 size={20} className="text-green-600" />
-                ) : (
-                  <AlertTriangle size={20} className="text-yellow-600" />
-                )}
-              </div>
-              <div className="text-2xl font-bold text-gray-800 mb-1">
-                {metric.value.toFixed(1)}{metric.unit}
-              </div>
-              {metric.recommendation && (
-                <div className="text-xs text-gray-600 mt-2">{metric.recommendation}</div>
-              )}
-            </motion.div>
-          ))}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+          <div>
+            <p className="text-sm text-gray-600">로딩 시간</p>
+            <p className="text-2xl font-bold text-gray-900">{metrics.loadTime}ms</p>
+          </div>
+          <div className={`px-3 py-1 rounded-full text-sm font-bold text-${grade.color}-600 bg-${grade.color}-100`}>
+            {grade.grade}
+          </div>
         </div>
 
-        {/* 최적화 제안 */}
-        {optimizations.length > 0 && (
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-            <h3 className="font-semibold text-blue-800 mb-2">최적화 제안</h3>
-            <ul className="space-y-1">
-              {optimizations.map((opt, index) => (
-                <li key={index} className="text-sm text-blue-700 flex items-start gap-2">
-                  <TrendingDown size={14} className="mt-0.5 shrink-0" />
-                  {opt}
-                </li>
-              ))}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <p className="text-sm text-gray-600">렌더링 시간</p>
+            <p className="text-xl font-bold text-gray-900">{metrics.renderTime}ms</p>
+          </div>
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <p className="text-sm text-gray-600">리소스 수</p>
+            <p className="text-xl font-bold text-gray-900">{metrics.resourceCount}</p>
+          </div>
+        </div>
+
+        <div className="p-4 bg-gray-50 rounded-lg">
+          <p className="text-sm text-gray-600">총 전송 크기</p>
+          <p className="text-xl font-bold text-gray-900">{metrics.totalSize} KB</p>
+        </div>
+
+        <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg">
+          <CheckCircle className="text-blue-600 flex-shrink-0 mt-0.5" size={18} />
+          <div className="text-sm text-blue-800">
+            <p className="font-medium mb-1">최적화 팁</p>
+            <ul className="list-disc list-inside space-y-1 text-blue-700">
+              <li>이미지 최적화 및 지연 로딩 사용</li>
+              <li>코드 분할 및 트리 쉐이킹</li>
+              <li>CDN 활용으로 리소스 로딩 속도 향상</li>
             </ul>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
 }
-

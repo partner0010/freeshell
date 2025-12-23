@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Bot, Play, CheckCircle, XCircle, Loader2, Zap, Search, Image, Code } from 'lucide-react';
+import { Bot, Play, CheckCircle, XCircle, Loader2, Zap, Search, Image, Code, Clock, Calendar, Workflow, Repeat, Settings, BarChart3, FileText, Cloud } from 'lucide-react';
 import Link from 'next/link';
 import { Sparkles } from 'lucide-react';
 import { agentManager, type Agent, type AgentTask } from '@/lib/ai/agents';
@@ -14,6 +14,9 @@ export default function AgentsPage() {
   const [tasks, setTasks] = useState<AgentTask[]>([]);
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [taskInput, setTaskInput] = useState('');
+  const [activeTab, setActiveTab] = useState<'agents' | 'workflows' | 'scheduled' | 'history'>('agents');
+  const [workflows, setWorkflows] = useState<any[]>([]);
+  const [scheduledTasks, setScheduledTasks] = useState<any[]>([]);
 
   useEffect(() => {
     loadAgents();
@@ -81,8 +84,128 @@ export default function AgentsPage() {
           </p>
         </div>
 
-        {/* 에이전트 목록 */}
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
+        {/* 탭 메뉴 */}
+        <div className="flex gap-2 border-b border-gray-200 mb-8">
+          {[
+            { id: 'agents', label: '에이전트', icon: Bot },
+            { id: 'workflows', label: '워크플로우', icon: Workflow },
+            { id: 'scheduled', label: '스케줄', icon: Calendar },
+            { id: 'history', label: '히스토리', icon: BarChart3 },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`px-6 py-3 font-medium transition-colors border-b-2 ${
+                  activeTab === tab.id
+                    ? 'border-purple-600 text-purple-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <Icon size={18} className="inline mr-2" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* 워크플로우 탭 */}
+        {activeTab === 'workflows' && (
+          <div className="space-y-6 mb-12">
+            <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-200">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">워크플로우 자동화</h2>
+                <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2">
+                  <Workflow size={18} />
+                  새 워크플로우
+                </button>
+              </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                {[
+                  { name: '일일 리포트 생성', steps: 3, status: 'active', icon: FileText },
+                  { name: '콘텐츠 자동 생성', steps: 5, status: 'active', icon: Sparkles },
+                  { name: '데이터 백업', steps: 2, status: 'paused', icon: Cloud },
+                ].map((workflow, i) => (
+                  <div key={i} className="p-6 bg-gray-50 rounded-xl border border-gray-200">
+                    <div className="flex items-center gap-3 mb-3">
+                      <workflow.icon className="text-purple-600" size={24} />
+                      <div className="flex-1">
+                        <h3 className="font-bold text-gray-900">{workflow.name}</h3>
+                        <p className="text-sm text-gray-600">{workflow.steps}단계</p>
+                      </div>
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        workflow.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                      }`}>
+                        {workflow.status === 'active' ? '활성' : '일시정지'}
+                      </span>
+                    </div>
+                    <div className="flex gap-2">
+                      <button className="flex-1 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm">
+                        실행
+                      </button>
+                      <button className="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm">
+                        편집
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 스케줄 탭 */}
+        {activeTab === 'scheduled' && (
+          <div className="space-y-6 mb-12">
+            <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-200">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">예약된 작업</h2>
+                <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2">
+                  <Calendar size={18} />
+                  새 스케줄
+                </button>
+              </div>
+              <div className="space-y-4">
+                {[
+                  { name: '매일 오전 9시 리포트 생성', agent: '리포트 에이전트', nextRun: '2025-01-16 09:00', frequency: 'daily' },
+                  { name: '주간 데이터 분석', agent: '분석 에이전트', nextRun: '2025-01-20 00:00', frequency: 'weekly' },
+                  { name: '월간 백업', agent: '백업 에이전트', nextRun: '2025-02-01 00:00', frequency: 'monthly' },
+                ].map((schedule, i) => (
+                  <div key={i} className="p-6 bg-gray-50 rounded-xl border border-gray-200">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <Clock className="text-purple-600" size={20} />
+                          <h3 className="font-bold text-gray-900">{schedule.name}</h3>
+                        </div>
+                        <div className="text-sm text-gray-600 space-y-1">
+                          <p>에이전트: {schedule.agent}</p>
+                          <p>다음 실행: {schedule.nextRun}</p>
+                          <p>빈도: {schedule.frequency === 'daily' ? '매일' : schedule.frequency === 'weekly' ? '매주' : '매월'}</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <button className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm">
+                          활성
+                        </button>
+                        <button className="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm">
+                          편집
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 에이전트 탭 */}
+        {activeTab === 'agents' && (
+          <>
+            {/* 에이전트 목록 */}
+            <div className="grid md:grid-cols-3 gap-6 mb-12">
           {agents.map((agent) => (
             <motion.div
               key={agent.id}
@@ -160,8 +283,13 @@ export default function AgentsPage() {
             </div>
           </motion.div>
         )}
+          </>
+        )}
 
-        {/* 작업 목록 */}
+        {/* 히스토리 탭 */}
+        {activeTab === 'history' && (
+          <>
+            {/* 작업 목록 */}
         <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-200">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">작업 히스토리</h2>
           {tasks.length === 0 ? (
@@ -213,7 +341,9 @@ export default function AgentsPage() {
               })}
             </div>
           )}
-        </div>
+          </div>
+          </>
+        )}
 
         {/* 광고 배너 */}
         <div className="max-w-6xl mx-auto px-6 py-8">

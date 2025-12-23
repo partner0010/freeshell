@@ -1,9 +1,44 @@
-[build]
-  command = "npx prisma generate && npm run build"
-  publish = ".next"
+# Netlify 설정 파일
+# 프로젝트 루트에 위치해야 합니다
 
+[build]
+  # 빌드 명령어 (Prisma 클라이언트 생성 포함)
+  command = "npm run build"
+  
+  # Next.js 플러그인이 자동으로 publish 디렉토리를 처리하므로 명시하지 않음
+  # publish = ".next" (제거됨 - Next.js 플러그인이 자동 처리)
+  
+  # Node.js 버전
+  [build.environment]
+    NODE_VERSION = "18"
+    NPM_FLAGS = "--legacy-peer-deps"
+
+# Next.js 플러그인 (필수)
+# 이 플러그인이 자동으로 Next.js 빌드 및 배포를 처리합니다
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-[build.environment]
-  NODE_VERSION = "18"
+# 리디렉션 설정
+# Next.js 플러그인이 자동으로 리디렉션을 처리하므로 별도 설정 불필요
+# 필요시 아래 주석을 해제하여 커스텀 리디렉션 추가 가능
+# [[redirects]]
+#   from = "/old-path"
+#   to = "/new-path"
+#   status = 301
+
+# 보안 헤더
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
+
+# 함수 설정 (API 라우트)
+[functions]
+  node_bundler = "esbuild"
+  included_files = [
+    "prisma/**/*.prisma"
+  ]

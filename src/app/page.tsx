@@ -1,34 +1,53 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Sparkles, ArrowRight, Video, Image, FileText, 
   Globe, Zap, PlayCircle, Camera, Mic, Film, 
   Type, Palette, Rocket, Brain, Search, Code,
-  Wand2, Layers, Zap as Lightning, MessageSquare
+  Wand2, Layers, Zap as Lightning, MessageSquare, X
 } from 'lucide-react';
 import Link from 'next/link';
 import { GlobalHeader } from '@/components/layout/GlobalHeader';
+import { ChatGPTLikeSearch } from '@/components/ai/ChatGPTLikeSearch';
+import { SocialShare } from '@/components/social/SocialShare';
+import { PersonalizedRecommendations } from '@/components/recommendations/PersonalizedRecommendations';
+import { AccessibilityMenu } from '@/components/accessibility/AccessibilityMenu';
+import { FeedbackWidget } from '@/components/feedback/FeedbackWidget';
+import { OfflineIndicator } from '@/components/offline/OfflineIndicator';
+import { StructuredData } from '@/components/seo/StructuredData';
 
 export default function HomePage() {
+  const [showSearch, setShowSearch] = useState(false);
+
   return (
     <div className="min-h-screen bg-white">
+      {/* 구조화된 데이터 */}
+      <StructuredData 
+        type="WebPage" 
+        data={{ 
+          path: '/', 
+          title: 'Freeshell - AI 통합 콘텐츠 생성 솔루션',
+          description: 'AI로 만드는 수익형 콘텐츠. 숏폼, 영상, 이미지, 전자책, 글쓰기까지 완전 자동화'
+        }} 
+      />
+      
       {/* 헤더 */}
       <GlobalHeader />
 
-      {/* 히어로 섹션 - AI 사이트 스타일 */}
-      <section className="pt-16 sm:pt-24 pb-12 sm:pb-16 px-4 sm:px-6 relative overflow-hidden">
+      {/* 히어로 섹션 - AI 검색 통합 */}
+      <section className="pt-8 sm:pt-16 pb-12 sm:pb-16 px-4 sm:px-6 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-50/50 via-white to-blue-50/50" />
         <div className="absolute top-0 right-0 w-96 h-96 bg-purple-200/30 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-200/30 rounded-full blur-3xl" />
         
-        <div className="max-w-6xl mx-auto text-center relative z-10">
+        <div className="max-w-6xl mx-auto relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="mb-6"
+            className="mb-6 text-center"
           >
             <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-purple-50 text-purple-700 rounded-full text-sm font-medium border border-purple-200">
               <Sparkles size={14} />
@@ -40,7 +59,7 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 text-center leading-tight"
           >
             AI로 모든 것을<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600">
@@ -52,30 +71,66 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-lg sm:text-xl text-gray-600 mb-10 max-w-2xl mx-auto"
+            className="text-base sm:text-lg text-gray-600 mb-8 text-center max-w-2xl mx-auto"
           >
-            텍스트, 이미지, 영상, 음성까지. AI의 모든 기능을 한 곳에서 무료로 사용하세요
+            회원가입 없이 바로 사용할 수 있는 무료 AI 도구들
           </motion.p>
-          
+
+          {/* ChatGPT 스타일 AI 검색 */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12"
+            className="mb-8"
           >
-            <Link 
-              href="/auth/signup" 
-              className="group px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
-            >
-              <span>무료로 시작하기</span>
-              <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <Link 
-              href="/genspark" 
-              className="px-8 py-4 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-semibold text-lg hover:border-purple-500 hover:text-purple-600 transition-all"
-            >
-              AI 검색 체험
-            </Link>
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-6 max-w-4xl mx-auto">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+                    <Sparkles className="text-white" size={20} />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-gray-900">SHELL</h2>
+                    <p className="text-sm text-gray-500">AI 어시스턴트 - ChatGPT처럼 질문하고 답변받으세요</p>
+                  </div>
+                </div>
+                {showSearch && (
+                  <button
+                    onClick={() => setShowSearch(false)}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <X size={20} className="text-gray-500" />
+                  </button>
+                )}
+              </div>
+              
+              {showSearch ? (
+                <div className="mt-4">
+                  <ChatGPTLikeSearch />
+                </div>
+              ) : (
+                <div className="mt-4">
+                  <button
+                    onClick={() => setShowSearch(true)}
+                    className="w-full px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
+                  >
+                    <Search size={20} />
+                    <span>AI와 대화 시작하기</span>
+                    <ArrowRight size={20} />
+                  </button>
+                </div>
+              )}
+            </div>
+          </motion.div>
+
+          {/* 맞춤형 추천 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.35 }}
+            className="mb-8 max-w-4xl mx-auto"
+          >
+            <PersonalizedRecommendations />
           </motion.div>
 
           {/* 빠른 액세스 카드 */}
@@ -89,7 +144,7 @@ export default function HomePage() {
               { icon: Video, label: '영상 생성', href: '/creator', color: 'from-purple-500 to-pink-500' },
               { icon: Image, label: '이미지 생성', href: '/editor', color: 'from-pink-500 to-red-500' },
               { icon: FileText, label: '텍스트 생성', href: '/editor', color: 'from-blue-500 to-cyan-500' },
-              { icon: Search, label: 'AI 검색', href: '/genspark', color: 'from-green-500 to-emerald-500' },
+              { icon: Code, label: '코드 생성', href: '/editor', color: 'from-green-500 to-emerald-500' },
             ].map((item, i) => (
               <Link
                 key={i}
@@ -106,7 +161,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 주요 기능 섹션 - AI 사이트 스타일 */}
+      {/* 주요 기능 섹션 */}
       <section className="py-16 sm:py-24 px-4 sm:px-6 bg-gray-50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
@@ -120,6 +175,14 @@ export default function HomePage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
+              {
+                icon: Search,
+                title: 'AI 검색',
+                description: 'GENSPARK AI로 더 똑똑한 검색을 경험하세요',
+                href: '/genspark',
+                color: 'from-green-500 to-emerald-500',
+                featured: true,
+              },
               {
                 icon: Video,
                 title: '영상 생성',
@@ -142,13 +205,6 @@ export default function HomePage() {
                 color: 'from-blue-500 to-cyan-500',
               },
               {
-                icon: Search,
-                title: 'AI 검색',
-                description: 'GENSPARK AI로 더 똑똑한 검색을 경험하세요',
-                href: '/genspark',
-                color: 'from-green-500 to-emerald-500',
-              },
-              {
                 icon: Mic,
                 title: '음성 생성',
                 description: '자연스러운 AI 음성으로 나레이션을 만듭니다',
@@ -166,7 +222,9 @@ export default function HomePage() {
               <Link
                 key={i}
                 href={feature.href}
-                className="group bg-white rounded-2xl p-6 border border-gray-200 hover:border-purple-300 hover:shadow-xl transition-all"
+                className={`group bg-white rounded-2xl p-6 border border-gray-200 hover:border-purple-300 hover:shadow-xl transition-all ${
+                  feature.featured ? 'ring-2 ring-purple-200' : ''
+                }`}
               >
                 <div className={`w-14 h-14 bg-gradient-to-br ${feature.color} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
                   <feature.icon className="text-white" size={28} />
@@ -183,7 +241,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 작동 방식 - 간단하게 */}
+      {/* 작동 방식 */}
       <section className="py-16 sm:py-24 px-4 sm:px-6 bg-white">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
@@ -237,17 +295,38 @@ export default function HomePage() {
             <p className="text-lg text-white/90 mb-8">
               회원가입 없이 무료로 모든 AI 기능을 사용할 수 있습니다
             </p>
-            <Link 
-              href="/auth/signup" 
-              className="inline-flex items-center gap-2 px-8 py-4 bg-white text-purple-600 rounded-xl font-bold text-lg shadow-2xl hover:shadow-3xl transition-all hover:scale-105"
-            >
-              <Sparkles size={20} />
-              <span>무료로 시작하기</span>
-              <ArrowRight size={20} />
-            </Link>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+              <button
+                onClick={() => setShowSearch(true)}
+                className="inline-flex items-center gap-2 px-8 py-4 bg-white text-purple-600 rounded-xl font-bold text-lg shadow-2xl hover:shadow-3xl transition-all hover:scale-105"
+              >
+                <Search size={20} />
+                <span>AI 검색 시작</span>
+                <ArrowRight size={20} />
+              </button>
+              <Link 
+                href="/genspark" 
+                className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 backdrop-blur text-white border-2 border-white/30 rounded-xl font-bold text-lg hover:bg-white/20 transition-all"
+              >
+                <Sparkles size={20} />
+                <span>전체 기능 보기</span>
+              </Link>
+            </div>
+            <div className="flex justify-center">
+              <SocialShare className="bg-white/20 backdrop-blur rounded-xl p-3" />
+            </div>
           </motion.div>
         </div>
       </section>
+
+      {/* 접근성 메뉴 */}
+      <AccessibilityMenu />
+
+      {/* 피드백 위젯 */}
+      <FeedbackWidget />
+
+      {/* 오프라인 표시기 */}
+      <OfflineIndicator />
 
       {/* 푸터 */}
       <footer className="py-12 px-4 sm:px-6 bg-gray-900 text-white">

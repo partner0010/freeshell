@@ -110,6 +110,15 @@ export const authOptions: NextAuthOptions = {
         token.accessToken = account.access_token;
         token.email = user.email || undefined;
         token.id = user.id;
+        
+        // 사용자 role 정보 가져오기
+        if (user.id) {
+          const dbUser = await prisma.user.findUnique({
+            where: { id: user.id },
+            select: { role: true },
+          });
+          token.role = dbUser?.role || 'user';
+        }
       }
       return token;
     },
@@ -117,6 +126,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.email = token.email as string;
         session.user.id = token.id as string;
+        session.user.role = token.role as string;
       }
       return session;
     },

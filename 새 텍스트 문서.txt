@@ -1,0 +1,9 @@
+관리자 계정 사용 방법
+관리자 계정 생성
+   # API 호출   curl -X POST http://localhost:3000/api/admin/init
+관리자 로그인
+/auth/signin 접속
+이메일: admin@freeshell.co.kr
+비밀번호: admin123!@#
+관리자 페이지 접근
+로그인 후 /admin 접근

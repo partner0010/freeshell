@@ -30,6 +30,7 @@ import { PreviewPerformance } from '@/components/editor/PreviewPerformance';
 import { PreviewAccessibility } from '@/components/editor/PreviewAccessibility';
 import { VoiceTranslation } from '@/components/editor/VoiceTranslation';
 import { ErrorBoundary } from '@/components/error/ErrorBoundary';
+import { RealTimeCollaboration } from '@/components/collaboration/RealTimeCollaboration';
 
 // 전체화면 이벤트 핸들러 컴포넌트
 function PreviewFullscreenHandler({ onFullscreenChange }: { onFullscreenChange: (isFullscreen: boolean) => void }) {
@@ -493,7 +494,7 @@ function EditorPageContent() {
       {/* PWA 설치 프롬프트 */}
       <PWAInstallPrompt />
 
-      {/* 음성 번역 메모 (항상 활성) */}
+      {/* 음성 번역 메모 (최소화 가능) */}
       <VoiceTranslation
         onSave={(memos) => {
           // 마이페이지에 저장
@@ -508,6 +509,7 @@ function EditorPageContent() {
           const existing = JSON.parse(localStorage.getItem('grip-saved-items') || '[]');
           localStorage.setItem('grip-saved-items', JSON.stringify([item, ...existing]));
         }}
+        defaultMinimized={true}
       />
       </div>
     </ToastProvider>
