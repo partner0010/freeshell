@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { GlobalHeader } from '@/components/layout/GlobalHeader';
+import { Footer } from '@/components/layout/Footer';
 import { ChatGPTLikeSearch } from '@/components/ai/ChatGPTLikeSearch';
 import { SocialShare } from '@/components/social/SocialShare';
 import { PersonalizedRecommendations } from '@/components/recommendations/PersonalizedRecommendations';
@@ -329,26 +330,7 @@ export default function HomePage() {
       <OfflineIndicator />
 
       {/* 푸터 */}
-      <footer className="py-12 px-4 sm:px-6 bg-gray-900 text-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-                <Sparkles className="text-white" size={20} />
-              </div>
-              <span className="font-bold text-xl">Freeshell</span>
-            </div>
-            <div className="flex items-center gap-6 text-gray-400 text-sm">
-              <Link href="/admin" className="hover:text-white transition-colors">관리자</Link>
-              <a href="#" className="hover:text-white transition-colors">이용약관</a>
-              <a href="#" className="hover:text-white transition-colors">개인정보처리방침</a>
-            </div>
-          </div>
-          <div className="mt-8 pt-8 border-t border-gray-800 text-center text-gray-400 text-sm">
-            © 2024 Freeshell. All rights reserved.
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

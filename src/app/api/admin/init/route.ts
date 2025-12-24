@@ -18,8 +18,10 @@ export async function POST() {
         role: admin.role,
       },
       credentials: {
-        email: 'admin@freeshell.co.kr',
-        password: 'admin123!@#',
+        email: process.env.ADMIN_EMAIL || 'admin@freeshell.co.kr',
+        password: process.env.ADMIN_INITIAL_PASSWORD 
+          ? '[환경 변수에서 설정됨]' 
+          : '[랜덤 생성됨 - 환경 변수 ADMIN_INITIAL_PASSWORD 설정 필요]',
         note: '보안을 위해 로그인 후 비밀번호를 변경하세요!',
       },
     });

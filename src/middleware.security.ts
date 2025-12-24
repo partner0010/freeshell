@@ -5,15 +5,13 @@
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { getNextJSecurityHeaders } from '@/lib/security/security-headers';
+import { securityHeaders } from '@/lib/security/security-headers';
 
 /**
  * 보안 헤더를 추가한 응답 생성
  */
 export function addSecurityHeaders(response: NextResponse): NextResponse {
-  const headers = getNextJSecurityHeaders();
-  
-  Object.entries(headers).forEach(([key, value]) => {
+  Object.entries(securityHeaders).forEach(([key, value]) => {
     response.headers.set(key, value);
   });
 

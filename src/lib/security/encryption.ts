@@ -326,12 +326,113 @@ function arrayBufferToHex(buffer: ArrayBuffer | Uint8Array): string {
 // Export
 // ============================================
 
+/**
+ * 간단한 문자열 기반 암호화 (문자열 키 사용)
+ */
+export async function encrypt(data: string, key: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(key);
+  
+  // 키에서 암호화 키 파생
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw',
+    keyData,
+    'PBKDF2',
+    false,
+    ['deriveKey']
+  );
+  
+  const derivedKey = await crypto.subtle.deriveKey(
+    {
+      name: 'PBKDF2',
+      salt: new Uint8Array(16), // 고정 salt (실제로는 랜덤 사용 권장)
+      iterations: 100000,
+      hash: 'SHA-256',
+    },
+    cryptoKey,
+    {
+      name: 'AES-GCM',
+      length: 256,
+    },
+    true,
+    ['encrypt', 'decrypt']
+  );
+  
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encrypted = await crypto.subtle.encrypt(
+    {
+      name: 'AES-GCM',
+      iv,
+    },
+    derivedKey,
+    encoder.encode(data)
+  );
+  
+  // IV와 암호문을 함께 반환
+  const combined = new Uint8Array(iv.length + encrypted.byteLength);
+  combined.set(iv, 0);
+  combined.set(new Uint8Array(encrypted), iv.length);
+  
+  return arrayBufferToBase64(combined.buffer);
+}
+
+/**
+ * 간단한 문자열 기반 복호화 (문자열 키 사용)
+ */
+export async function decrypt(encryptedData: string, key: string): Promise<string> {
+  const decoder = new TextDecoder();
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(key);
+  
+  // 키에서 암호화 키 파생
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw',
+    keyData,
+    'PBKDF2',
+    false,
+    ['deriveKey']
+  );
+  
+  const derivedKey = await crypto.subtle.deriveKey(
+    {
+      name: 'PBKDF2',
+      salt: new Uint8Array(16), // 고정 salt (실제로는 랜덤 사용 권장)
+      iterations: 100000,
+      hash: 'SHA-256',
+    },
+    cryptoKey,
+    {
+      name: 'AES-GCM',
+      length: 256,
+    },
+    true,
+    ['encrypt', 'decrypt']
+  );
+  
+  const combined = base64ToArrayBuffer(encryptedData);
+  const iv = new Uint8Array(combined, 0, 12);
+  const ciphertext = new Uint8Array(combined, 12);
+  
+  const decrypted = await crypto.subtle.decrypt(
+    {
+      name: 'AES-GCM',
+      iv,
+    },
+    derivedKey,
+    ciphertext
+  );
+  
+  return decoder.decode(decrypted);
+}
+
 export const Encryption = {
   // AES
   generateEncryptionKey,
   deriveKeyFromPassword,
   encryptData,
   decryptData,
+  encrypt,
+  decrypt,
   
   // RSA
   generateRsaKeyPair,

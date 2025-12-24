@@ -37,7 +37,9 @@ interface SavedItem {
 export default function MyPage() {
   const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
   const [filter, setFilter] = useState<'all' | 'signature' | 'voice-memo' | 'code-analysis' | 'project'>('all');
-  const [activeTab, setActiveTab] = useState<'saved' | 'analytics' | 'templates'>('saved');
+  const [activeTab, setActiveTab] = useState<'saved' | 'analytics' | 'templates' | 'privacy'>('saved');
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // 로컬 스토리지에서 불러오기
   React.useEffect(() => {
@@ -124,6 +126,44 @@ export default function MyPage() {
     }
   };
 
+  // 개인정보 삭제 함수
+  const handleDeleteData = async (deleteType: 'chat' | 'content' | 'all') => {
+    if (!deleteConfirm || deleteConfirm !== '삭제') {
+      alert('"삭제"라고 정확히 입력해주세요.');
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      const response = await fetch('/api/user/delete-data', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ deleteType }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert('개인정보가 성공적으로 삭제되었습니다.');
+        if (deleteType === 'all') {
+          // 회원 탈퇴 시 로그아웃 처리
+          window.location.href = '/auth/signin';
+        } else {
+          setDeleteConfirm(null);
+        }
+      } else {
+        alert(data.error || '개인정보 삭제 중 오류가 발생했습니다.');
+      }
+    } catch (error) {
+      console.error('개인정보 삭제 오류:', error);
+      alert('개인정보 삭제 중 오류가 발생했습니다.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 헤더 */}
@@ -161,6 +201,7 @@ export default function MyPage() {
             { id: 'saved', label: '저장된 항목', icon: Save },
             { id: 'analytics', label: '분석', icon: BarChart3 },
             { id: 'templates', label: '템플릿', icon: Layers },
+            { id: 'privacy', label: '개인정보 관리', icon: Shield },
           ].map((tab) => {
             const Icon = tab.icon;
             return (
@@ -192,6 +233,111 @@ export default function MyPage() {
       {activeTab === 'templates' && (
         <div className="max-w-7xl mx-auto px-6 py-8">
           <TemplateMarketplace />
+        </div>
+      )}
+
+      {/* 개인정보 관리 탭 */}
+      {activeTab === 'privacy' && (
+        <div className="max-w-4xl mx-auto px-6 py-8">
+          <div className="bg-white rounded-2xl shadow-lg p-8 space-y-8">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+                <Shield size={24} />
+                개인정보 관리
+              </h2>
+              <p className="text-gray-600">
+                GDPR 및 개인정보보호법에 따라 개인정보를 관리할 수 있습니다.
+              </p>
+            </div>
+
+            {/* 개인정보 삭제 옵션 */}
+            <div className="space-y-6">
+              <div className="border border-gray-200 rounded-xl p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">AI 대화 기록 삭제</h3>
+                <p className="text-gray-600 text-sm mb-4">
+                  AI와의 모든 대화 기록을 삭제합니다. 이 작업은 되돌릴 수 없습니다.
+                </p>
+                <button
+                  onClick={() => {
+                    const confirm = prompt('정말 삭제하시겠습니까? "삭제"라고 입력해주세요.');
+                    if (confirm === '삭제') {
+                      setDeleteConfirm('삭제');
+                      handleDeleteData('chat');
+                    }
+                  }}
+                  disabled={isDeleting}
+                  className="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors disabled:opacity-50"
+                >
+                  {isDeleting ? '삭제 중...' : 'AI 대화 기록 삭제'}
+                </button>
+              </div>
+
+              <div className="border border-gray-200 rounded-xl p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">생성된 콘텐츠 삭제</h3>
+                <p className="text-gray-600 text-sm mb-4">
+                  생성한 모든 콘텐츠(텍스트, 이미지, 코드 등)를 삭제합니다.
+                </p>
+                <button
+                  onClick={() => {
+                    const confirm = prompt('정말 삭제하시겠습니까? "삭제"라고 입력해주세요.');
+                    if (confirm === '삭제') {
+                      setDeleteConfirm('삭제');
+                      handleDeleteData('content');
+                    }
+                  }}
+                  disabled={isDeleting}
+                  className="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors disabled:opacity-50"
+                >
+                  {isDeleting ? '삭제 중...' : '생성된 콘텐츠 삭제'}
+                </button>
+              </div>
+
+              <div className="border-2 border-red-200 rounded-xl p-6 bg-red-50">
+                <h3 className="text-lg font-semibold text-red-900 mb-2 flex items-center gap-2">
+                  <Trash2 size={20} />
+                  모든 개인정보 삭제 (회원 탈퇴)
+                </h3>
+                <p className="text-red-700 text-sm mb-4">
+                  계정과 모든 개인정보를 영구적으로 삭제합니다. 이 작업은 되돌릴 수 없으며, 
+                  모든 데이터가 즉시 삭제됩니다.
+                </p>
+                <button
+                  onClick={() => {
+                    const confirm = prompt('정말 회원 탈퇴하시겠습니까? "삭제"라고 입력해주세요.');
+                    if (confirm === '삭제') {
+                      setDeleteConfirm('삭제');
+                      handleDeleteData('all');
+                    }
+                  }}
+                  disabled={isDeleting}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                >
+                  {isDeleting ? '삭제 중...' : '회원 탈퇴 및 모든 데이터 삭제'}
+                </button>
+              </div>
+            </div>
+
+            {/* 법적 문서 링크 */}
+            <div className="border-t border-gray-200 pt-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">관련 문서</h3>
+              <div className="flex flex-wrap gap-4">
+                <Link
+                  href="/privacy"
+                  className="text-blue-600 hover:text-blue-800 underline flex items-center gap-1"
+                >
+                  <FileText size={16} />
+                  개인정보 처리방침
+                </Link>
+                <Link
+                  href="/terms"
+                  className="text-blue-600 hover:text-blue-800 underline flex items-center gap-1"
+                >
+                  <FileText size={16} />
+                  이용약관
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

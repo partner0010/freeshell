@@ -32,8 +32,13 @@ export * from './env-validator';
 export { default as EnvValidator } from './env-validator';
 
 // Vulnerability Scanner
-export * from './vulnerability-scanner';
-export { default as VulnerabilityScanner } from './vulnerability-scanner';
+export { 
+  scanInput, 
+  validateRequest, 
+  maskPersonalInfo,
+  type VulnerabilityReport 
+} from './vulnerability-scanner';
+export { sanitizeInputForVulnerability as sanitizeInputVuln } from './vulnerability-scanner';
 
 // Advanced Security
 export * from './advanced-security';

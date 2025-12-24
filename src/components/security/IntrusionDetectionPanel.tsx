@@ -11,29 +11,48 @@ import {
   XCircle,
 } from 'lucide-react';
 import {
-  idsSystem,
+  getBlockedIPs,
   type IntrusionAlert,
-  type BehaviorPattern,
 } from '@/lib/security/intrusion-detection';
+import { getSecurityEvents } from '@/lib/security/security-monitor';
 
 export function IntrusionDetectionPanel() {
   const [alerts, setAlerts] = useState<IntrusionAlert[]>([]);
-  const [patterns, setPatterns] = useState<BehaviorPattern[]>([]);
+  const [blockedIPs, setBlockedIPs] = useState<string[]>([]);
   const [isMonitoring, setIsMonitoring] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = idsSystem.subscribe((alert) => {
-      setAlerts((prev) => [alert, ...prev]);
-    });
-
     loadData();
-
-    return () => unsubscribe();
+    // 주기적으로 데이터 새로고침
+    const interval = setInterval(loadData, 5000);
+    return () => clearInterval(interval);
   }, []);
 
-  const loadData = () => {
-    setAlerts(idsSystem.getAlerts(50));
-    setPatterns(idsSystem.getBehaviorPatterns());
+  const loadData = async () => {
+    try {
+      // 보안 이벤트에서 침입 관련 이벤트 가져오기
+      const events = getSecurityEvents({ 
+        type: 'intrusion', 
+        limit: 50 
+      });
+      
+      // IntrusionAlert 형식으로 변환
+      const intrusionAlerts: IntrusionAlert[] = events.map(event => ({
+        type: event.details.type || 'suspicious_activity',
+        severity: event.severity,
+        ip: event.source,
+        userAgent: event.details.userAgent || 'unknown',
+        path: event.details.path || 'unknown',
+        timestamp: event.timestamp,
+        details: event.details.details || '',
+        blocked: event.details.blocked || false,
+      }));
+      
+      setAlerts(intrusionAlerts);
+      setBlockedIPs(getBlockedIPs());
+    } catch (error) {
+      console.error('Failed to load intrusion data:', error);
+    }
   };
 
   const handleStartMonitoring = () => {
@@ -112,18 +131,21 @@ export function IntrusionDetectionPanel() {
                 알림이 없습니다
               </div>
             ) : (
-              alerts.map((alert) => (
+              alerts.map((alert, index) => (
                 <div
-                  key={alert.id}
+                  key={`${alert.ip}-${alert.timestamp.getTime()}-${index}`}
                   className={`p-4 border-2 rounded-xl ${getSeverityColor(alert.severity)}`}
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-3">
                       {getAlertIcon(alert.type)}
                       <div>
-                        <div className="font-semibold text-gray-800">{alert.description}</div>
+                        <div className="font-semibold text-gray-800">{alert.details}</div>
                         <div className="text-sm text-gray-600 mt-1">
-                          {alert.source} → {alert.target}
+                          {alert.ip} → {alert.path}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          {alert.userAgent}
                         </div>
                       </div>
                     </div>
@@ -141,64 +163,34 @@ export function IntrusionDetectionPanel() {
                   <div className="text-xs text-gray-500 mt-2">
                     {new Date(alert.timestamp).toLocaleString()}
                   </div>
-                  {alert.evidence.length > 0 && (
-                    <details className="mt-3">
-                      <summary className="text-xs cursor-pointer">증거 보기</summary>
-                      <ul className="mt-2 space-y-1 text-xs">
-                        {alert.evidence.map((ev, i) => (
-                          <li key={i}>• {ev}</li>
-                        ))}
-                      </ul>
-                    </details>
-                  )}
                 </div>
               ))
             )}
           </div>
         </section>
 
-        {/* 행동 패턴 */}
+        {/* 차단된 IP */}
         <section>
-          <h3 className="text-lg font-bold text-gray-800 mb-4">의심스러운 행동 패턴</h3>
+          <h3 className="text-lg font-bold text-gray-800 mb-4">차단된 IP ({blockedIPs.length})</h3>
           <div className="space-y-3">
-            {patterns.length === 0 ? (
+            {blockedIPs.length === 0 ? (
               <div className="text-center py-12 text-gray-400">
-                패턴이 없습니다
+                차단된 IP가 없습니다
               </div>
             ) : (
-              patterns
-                .filter((p) => p.riskScore > 30)
-                .sort((a, b) => b.riskScore - a.riskScore)
-                .map((pattern) => (
-                  <div
-                    key={pattern.ip}
-                    className="p-4 bg-white border rounded-xl"
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="font-semibold text-gray-800">{pattern.ip}</div>
-                      <div className="text-right">
-                        <div className="text-lg font-bold text-red-600">{pattern.riskScore}</div>
-                        <div className="text-xs text-gray-500">위험 점수</div>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-4 text-sm">
-                      <div>
-                        <div className="text-gray-500">요청 수</div>
-                        <div className="font-medium">{pattern.requestCount}</div>
-                      </div>
-                      <div>
-                        <div className="text-gray-500">에러 수</div>
-                        <div className="font-medium">{pattern.errorCount}</div>
-                      </div>
-                      <div>
-                        <div className="text-gray-500">마지막 활동</div>
-                        <div className="font-medium">
-                          {new Date(pattern.lastSeen).toLocaleTimeString()}
-                        </div>
-                      </div>
-                    </div>
+              blockedIPs.map((ip) => (
+                <div
+                  key={ip}
+                  className="p-4 bg-white border rounded-xl"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="font-semibold text-gray-800">{ip}</div>
+                    <span className="px-2 py-1 bg-red-200 text-red-700 rounded text-xs">
+                      차단됨
+                    </span>
                   </div>
-                ))
+                </div>
+              ))
             )}
           </div>
         </section>

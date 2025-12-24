@@ -7,6 +7,9 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import { securityMiddleware } from './middleware-security';
+import { validateRequest } from '@/lib/security/vulnerability-scanner';
+import { trackRequest } from '@/lib/security/intrusion-detection';
+import { logIntrusionAlert, logVulnerabilityReport } from '@/lib/security/security-monitor';
 
 // ============================================
 // 보안 설정
@@ -120,7 +123,47 @@ export async function middleware(request: NextRequest) {
   const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
   const userAgent = request.headers.get('user-agent') || '';
 
-  // AI Security Guard - 실시간 위협 감지 및 차단
+  // 1. 취약점 스캔 (SQL Injection, XSS, CSRF 등)
+  const vulnerabilityCheck = validateRequest(request);
+  if (vulnerabilityCheck.blocked) {
+    // 취약점 발견 시 로그 기록
+    vulnerabilityCheck.vulnerabilities.forEach(v => {
+      logVulnerabilityReport(v);
+    });
+    
+    return new NextResponse(
+      JSON.stringify({ 
+        error: '보안 위협이 감지되었습니다.',
+        blocked: true 
+      }),
+      { 
+        status: 403,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
+  }
+
+  // 2. 침입 탐지 시스템 (IDS)
+  const intrusionCheck = trackRequest(request);
+  if (!intrusionCheck.allowed) {
+    // 침입 시도 로그 기록
+    intrusionCheck.alerts.forEach(alert => {
+      logIntrusionAlert(alert);
+    });
+    
+    return new NextResponse(
+      JSON.stringify({ 
+        error: '의심스러운 활동이 감지되어 접근이 차단되었습니다.',
+        blocked: true 
+      }),
+      { 
+        status: 403,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
+  }
+
+  // 3. AI Security Guard - 실시간 위협 감지 및 차단
   const securityResponse = await securityMiddleware(request);
   if (securityResponse.status !== 200) {
     return securityResponse;
