@@ -42,7 +42,6 @@ export class MenuOrganizer {
       id: 'main',
       label: '주요',
       items: [
-        { id: 'genspark-page', label: '맞춤형 페이지 생성', category: 'main', keywords: ['GENSPARK', '맞춤형', '페이지', 'AI'], priority: 11 }, // 최상단 배치
         { id: 'blocks', label: '블록', category: 'main', keywords: ['블록', '컴포넌트'], priority: 10 },
         { id: 'styles', label: '스타일', category: 'main', keywords: ['스타일', '디자인'], priority: 9 },
         { id: 'copilot', label: 'AI', category: 'main', keywords: ['AI', '인공지능'], priority: 10 },

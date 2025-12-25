@@ -3,7 +3,29 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Mic, FileText, Download, Upload, Loader2, CheckCircle } from 'lucide-react';
-import { generateMeetingNotes, type MeetingNote } from '@/lib/ai/genspark-meeting';
+// Meeting notes functionality - to be implemented with SHELL AI
+interface MeetingNote {
+  title: string;
+  summary: string;
+  keyPoints: string[];
+  actionItems: Array<{
+    task: string;
+    assignee: string;
+    priority: 'high' | 'medium' | 'low';
+  }>;
+  participants: string[];
+  date: Date;
+  duration: number;
+  transcript?: string;
+}
+
+async function generateMeetingNotes(
+  audioFile: File,
+  options?: { language?: string; includeTranscript?: boolean; includeActionItems?: boolean }
+): Promise<MeetingNote> {
+  // TODO: Implement with SHELL AI
+  throw new Error('Meeting notes feature will be implemented with SHELL AI');
+}
 import { GlobalHeader } from '@/components/layout/GlobalHeader';
 
 export default function MeetingNotesPage() {
@@ -92,7 +114,7 @@ ${meetingNote.transcript}
           <div className="inline-flex items-center gap-3 mb-4">
             <Mic className="text-purple-600" size={32} />
             <h1 className="text-4xl md:text-5xl font-display font-bold text-gray-900">
-              GENSPARK AI 회의 노트
+              SHELL AI 회의 노트
             </h1>
           </div>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">

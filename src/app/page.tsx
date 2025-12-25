@@ -20,7 +20,6 @@ import { OfflineIndicator } from '@/components/offline/OfflineIndicator';
 import { StructuredData } from '@/components/seo/StructuredData';
 
 export default function HomePage() {
-  const [showSearch, setShowSearch] = useState(false);
 
   return (
     <div className="min-h-screen bg-white">
@@ -37,22 +36,22 @@ export default function HomePage() {
       {/* 헤더 */}
       <GlobalHeader />
 
-      {/* 히어로 섹션 - AI 검색 통합 */}
-      <section className="pt-8 sm:pt-16 pb-12 sm:pb-16 px-4 sm:px-6 relative overflow-hidden">
+      {/* 히어로 섹션 - SHELL AI 통합 */}
+      <section className="pt-6 sm:pt-8 md:pt-12 lg:pt-16 pb-8 sm:pb-12 md:pb-16 px-3 sm:px-4 md:px-6 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-50/50 via-white to-blue-50/50" />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-purple-200/30 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-200/30 rounded-full blur-3xl" />
+        <div className="absolute top-0 right-0 w-64 h-64 sm:w-96 sm:h-96 bg-purple-200/30 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 sm:w-96 sm:h-96 bg-blue-200/30 rounded-full blur-3xl" />
         
         <div className="max-w-6xl mx-auto relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="mb-6 text-center"
+            className="mb-4 sm:mb-6 text-center"
           >
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-purple-50 text-purple-700 rounded-full text-sm font-medium border border-purple-200">
-              <Sparkles size={14} />
-              무료 AI 도구 모음
+            <span className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1 sm:py-1.5 bg-purple-50 text-purple-700 rounded-full text-xs sm:text-sm font-medium border border-purple-200">
+              <Sparkles size={12} className="sm:w-4 sm:h-4" />
+              <span className="whitespace-nowrap">무료 AI 도구 모음</span>
             </span>
           </motion.div>
           
@@ -60,9 +59,10 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 text-center leading-tight"
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 mb-3 sm:mb-4 text-center leading-tight px-2"
           >
-            AI로 모든 것을<br />
+            <span className="block sm:inline">AI로 모든 것을</span>
+            <br className="hidden sm:block" />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600">
               더 쉽게
             </span>
@@ -72,7 +72,7 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-base sm:text-lg text-gray-600 mb-8 text-center max-w-2xl mx-auto"
+            className="text-sm sm:text-base md:text-lg text-gray-600 mb-6 sm:mb-8 text-center max-w-2xl mx-auto px-4"
           >
             회원가입 없이 바로 사용할 수 있는 무료 AI 도구들
           </motion.p>
@@ -84,43 +84,22 @@ export default function HomePage() {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="mb-8"
           >
-            <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-6 max-w-4xl mx-auto">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-                    <Sparkles className="text-white" size={20} />
+            <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-xl sm:rounded-2xl shadow-xl border border-gray-200/80 dark:border-gray-700/80 p-4 sm:p-6 max-w-4xl mx-auto w-full supports-[backdrop-filter]:bg-white/80 supports-[backdrop-filter]:dark:bg-gray-900/80">
+              <div className="flex items-center justify-between mb-3 sm:mb-4 gap-2">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Sparkles className="text-white" size={16} />
                   </div>
-                  <div>
-                    <h2 className="text-lg font-bold text-gray-900">SHELL</h2>
-                    <p className="text-sm text-gray-500">AI 어시스턴트 - ChatGPT처럼 질문하고 답변받으세요</p>
+                  <div className="min-w-0 flex-1">
+                    <h2 className="text-base sm:text-lg font-bold text-gray-900 truncate">SHELL</h2>
+                    <p className="text-xs sm:text-sm text-gray-500 truncate">AI 어시스턴트 - ChatGPT처럼 질문하고 답변받으세요</p>
                   </div>
                 </div>
-                {showSearch && (
-                  <button
-                    onClick={() => setShowSearch(false)}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                  >
-                    <X size={20} className="text-gray-500" />
-                  </button>
-                )}
               </div>
               
-              {showSearch ? (
-                <div className="mt-4">
-                  <ChatGPTLikeSearch />
-                </div>
-              ) : (
-                <div className="mt-4">
-                  <button
-                    onClick={() => setShowSearch(true)}
-                    className="w-full px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
-                  >
-                    <Search size={20} />
-                    <span>AI와 대화 시작하기</span>
-                    <ArrowRight size={20} />
-                  </button>
-                </div>
-              )}
+              <div className="mt-3 sm:mt-4 w-full">
+                <ChatGPTLikeSearch />
+              </div>
             </div>
           </motion.div>
 
@@ -177,14 +156,6 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               {
-                icon: Search,
-                title: 'AI 검색',
-                description: 'GENSPARK AI로 더 똑똑한 검색을 경험하세요',
-                href: '/genspark',
-                color: 'from-green-500 to-emerald-500',
-                featured: true,
-              },
-              {
                 icon: Video,
                 title: '영상 생성',
                 description: '텍스트나 이미지로 영상을 자동 생성합니다',
@@ -206,26 +177,24 @@ export default function HomePage() {
                 color: 'from-blue-500 to-cyan-500',
               },
               {
-                icon: Mic,
-                title: '음성 생성',
-                description: '자연스러운 AI 음성으로 나레이션을 만듭니다',
-                href: '/creator',
-                color: 'from-indigo-500 to-purple-500',
-              },
-              {
                 icon: Code,
                 title: '코드 생성',
                 description: 'AI가 코드를 작성하고 최적화해줍니다',
                 href: '/editor',
                 color: 'from-orange-500 to-yellow-500',
               },
+              {
+                icon: Mic,
+                title: '음성 생성',
+                description: '자연스러운 AI 음성으로 나레이션을 만듭니다',
+                href: '/creator',
+                color: 'from-indigo-500 to-purple-500',
+              },
             ].map((feature, i) => (
               <Link
                 key={i}
                 href={feature.href}
-                className={`group bg-white rounded-2xl p-6 border border-gray-200 hover:border-purple-300 hover:shadow-xl transition-all ${
-                  feature.featured ? 'ring-2 ring-purple-200' : ''
-                }`}
+                className="group bg-white rounded-2xl p-6 border border-gray-200 hover:border-purple-300 hover:shadow-xl transition-all"
               >
                 <div className={`w-14 h-14 bg-gradient-to-br ${feature.color} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
                   <feature.icon className="text-white" size={28} />
@@ -298,22 +267,29 @@ export default function HomePage() {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
               <button
-                onClick={() => setShowSearch(true)}
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                 className="inline-flex items-center gap-2 px-8 py-4 bg-white text-purple-600 rounded-xl font-bold text-lg shadow-2xl hover:shadow-3xl transition-all hover:scale-105"
               >
-                <Search size={20} />
-                <span>AI 검색 시작</span>
+                <MessageSquare size={20} />
+                <span>SHELL AI와 대화하기</span>
                 <ArrowRight size={20} />
               </button>
-              <Link 
-                href="/genspark" 
+              <Link
+                href="/editor"
                 className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 backdrop-blur text-white border-2 border-white/30 rounded-xl font-bold text-lg hover:bg-white/20 transition-all"
               >
                 <Sparkles size={20} />
                 <span>전체 기능 보기</span>
               </Link>
             </div>
-            <div className="flex justify-center">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <button
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 backdrop-blur text-white border-2 border-white/30 rounded-xl font-semibold text-base hover:bg-white/20 transition-all"
+              >
+                <MessageSquare size={18} />
+                <span>SHELL AI와 대화하기</span>
+              </button>
               <SocialShare className="bg-white/20 backdrop-blur rounded-xl p-3" />
             </div>
           </motion.div>

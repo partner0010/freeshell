@@ -21,7 +21,6 @@ export function SitemapGenerator() {
     { loc: '/', lastmod: new Date().toISOString(), changefreq: 'daily', priority: 1.0 },
     { loc: '/editor', lastmod: new Date().toISOString(), changefreq: 'weekly', priority: 0.9 },
     { loc: '/creator', lastmod: new Date().toISOString(), changefreq: 'weekly', priority: 0.9 },
-    { loc: '/genspark', lastmod: new Date().toISOString(), changefreq: 'weekly', priority: 0.9 },
     { loc: '/agents', lastmod: new Date().toISOString(), changefreq: 'weekly', priority: 0.8 },
     { loc: '/trends', lastmod: new Date().toISOString(), changefreq: 'daily', priority: 0.8 },
     { loc: '/debug', lastmod: new Date().toISOString(), changefreq: 'weekly', priority: 0.7 },

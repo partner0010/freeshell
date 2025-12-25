@@ -5,6 +5,29 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 반응형 유틸리티 */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* 텍스트 오버플로우 방지 */
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  /* 안전한 컨테이너 */
+  .safe-container {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+}
+
 :root {
   --primary-gradient: linear-gradient(135deg, #E8E0F0 0%, #D6EAF8 50%, #D4EDE1 100%);
   --accent-gradient: linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%);

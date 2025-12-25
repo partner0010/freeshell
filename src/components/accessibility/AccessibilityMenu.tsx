@@ -46,23 +46,26 @@ export function AccessibilityMenu() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
               <Type size={16} />
-              폰트 크기
+              <span>폰트 크기</span>
+              <span className="text-xs text-gray-500 ml-1">(웹사이트 전체 텍스트 크기 조절)</span>
             </label>
             <div className="flex items-center gap-2">
               <button
                 onClick={decreaseFontSize}
-                className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+                className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 flex items-center justify-center"
                 aria-label="폰트 크기 줄이기"
+                title="폰트 크기 줄이기"
               >
-                <ZoomIn size={16} className="rotate-180" />
+                <span className="text-lg font-bold">−</span>
               </button>
               <span className="flex-1 text-center text-sm font-medium">{fontSize}px</span>
               <button
                 onClick={increaseFontSize}
-                className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+                className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 flex items-center justify-center"
                 aria-label="폰트 크기 늘리기"
+                title="폰트 크기 늘리기"
               >
-                <ZoomIn size={16} />
+                <span className="text-lg font-bold">+</span>
               </button>
             </div>
           </div>

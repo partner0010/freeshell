@@ -14,7 +14,7 @@ interface EditorState {
   // UI 상태
   isDragging: boolean;
   isPreviewMode: boolean;
-  sidebarTab: 'genspark-page' | 'blocks' | 'styles' | 'ai' | 'pages' | 'theme' | 'collab';
+  sidebarTab: 'blocks' | 'styles' | 'ai' | 'pages' | 'theme' | 'collab';
   
   // 히스토리 (Undo/Redo)
   history: Block[][];
@@ -48,7 +48,7 @@ interface EditorState {
   // UI
   setDragging: (isDragging: boolean) => void;
   setPreviewMode: (isPreview: boolean) => void;
-  setSidebarTab: (tab: 'genspark-page' | 'blocks' | 'styles' | 'ai' | 'pages' | 'theme' | 'collab') => void;
+  setSidebarTab: (tab: 'blocks' | 'styles' | 'ai' | 'pages' | 'theme' | 'collab') => void;
   
   // 히스토리
   undo: () => void;

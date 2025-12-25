@@ -20,11 +20,22 @@ export async function securityMiddleware(request: NextRequest) {
   const url = request.url;
   const pathname = new URL(url).pathname;
 
-  // 정적 파일은 스킵
+  // 정적 파일 및 정상 페이지는 스킵
+  const normalPages = [
+    '/editor', '/creator', '/agents', '/signature', 
+    '/trends', '/community', '/help', '/debug', '/validate', '/remote',
+    '/auth/signin', '/auth/signup', '/mypage', '/privacy', '/terms',
+    '/api/ai', '/api/content', '/api/signature', '/api/debug', '/api/validate'
+  ];
+  
+  const isNormalPage = normalPages.some(page => pathname.startsWith(page));
+  
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/static') ||
-    pathname.startsWith('/api/health')
+    pathname.startsWith('/api/health') ||
+    pathname === '/' ||
+    isNormalPage
   ) {
     return NextResponse.next();
   }

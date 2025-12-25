@@ -16,7 +16,6 @@ import EditorMinimap from '@/components/editor/EditorMinimap';
 import AIChatbot from '@/components/editor/AIChatbot';
 import ThemeToggle from '@/components/editor/ThemeToggle';
 import FloatingToolbar from '@/components/editor/FloatingToolbar';
-import { GensparkStyleCopilot } from '@/components/ai/GensparkStyleCopilot';
 import { OrganizedSidebar } from '@/components/editor/OrganizedSidebar';
 import { ToastProvider } from '@/components/ui/Toast';
 import { ThemeToggle as NewThemeToggle } from '@/components/ui/ThemeToggle';
@@ -470,14 +469,6 @@ function EditorPageContent() {
       {/* AI 챗봇 */}
       <AIChatbot />
 
-      {/* GenSpark 스타일 AI 코파일럿 */}
-      <GensparkStyleCopilot
-        onCommand={(command) => {
-          // 명령 처리 로직
-          console.log('AI Command:', command);
-          // 실제로는 agentOrchestrator로 전달
-        }}
-      />
 
       {/* 피드백 위젯 */}
       <FeedbackWidget />

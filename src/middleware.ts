@@ -130,9 +130,22 @@ export async function middleware(request: NextRequest) {
     pathname === '/' ||
     pathname.match(/\.(ico|png|jpg|jpeg|gif|svg|webp|css|js|woff|woff2|ttf|eot)$/);
 
-  // 1. 취약점 스캔 (SQL Injection, XSS, CSRF 등) - 정적 파일 및 루트 경로 제외
-  // 루트 경로(/)는 항상 허용
-  if (!skipSecurityScan && pathname !== '/') {
+  // 정상적인 페이지 경로는 보안 스캔 완전 제외
+  const normalPages = [
+    '/editor', '/creator', '/agents', '/signature', 
+    '/trends', '/community', '/help', '/debug', '/validate', '/remote',
+    '/auth/signin', '/auth/signup', '/mypage', '/privacy', '/terms',
+    '/api/ai', '/api/content', '/api/signature', '/api/debug', '/api/validate'
+  ];
+  
+  const isNormalPage = normalPages.some(page => pathname.startsWith(page));
+  const isApiRoute = pathname.startsWith('/api/');
+  
+  // 정상 페이지와 API는 보안 스캔 완전 건너뛰기
+  const shouldSkipSecurity = skipSecurityScan || isNormalPage || pathname === '/';
+
+  // 1. 취약점 스캔 - 정상 페이지는 완전 제외
+  if (!shouldSkipSecurity) {
     const vulnerabilityCheck = validateRequest(request);
     // Critical만 차단하고, 로그만 기록
     if (vulnerabilityCheck.blocked) {
@@ -160,8 +173,8 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // 2. 침입 탐지 시스템 (IDS) - 루트 경로는 제외
-  if (pathname !== '/') {
+  // 2. 침입 탐지 시스템 (IDS) - 정상 페이지는 완전 제외
+  if (!shouldSkipSecurity) {
     const intrusionCheck = trackRequest(request);
     // 실제 차단된 경우만 차단 (경고는 로그만)
     if (!intrusionCheck.allowed) {
@@ -186,10 +199,12 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // 3. AI Security Guard - 실시간 위협 감지 및 차단
-  const securityResponse = await securityMiddleware(request);
-  if (securityResponse.status !== 200) {
-    return securityResponse;
+  // 3. AI Security Guard - 정상 페이지는 건너뛰기
+  if (!shouldSkipSecurity) {
+    const securityResponse = await securityMiddleware(request);
+    if (securityResponse.status !== 200) {
+      return securityResponse;
+    }
   }
 
   // Rate Limiting

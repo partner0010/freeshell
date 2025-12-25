@@ -96,7 +96,7 @@ import { AIRecommendationsPanel } from '../ai/AIRecommendationsPanel';
 import { HighContrastPanel } from '../accessibility/HighContrastPanel';
 
 export type SidebarTab = 
-  | 'genspark-page' | 'blocks' | 'styles' | 'ai' | 'pages' | 'theme' | 'seo' 
+  | 'blocks' | 'styles' | 'ai' | 'pages' | 'theme' | 'seo' 
   | 'export' | 'project' | 'history' | 'performance' | 'accessibility' 
   | 'css' | 'share' | 'collab' | 'version' | 'copilot'
   | 'form' | 'abtest' | 'language' | 'grid'
@@ -124,7 +124,6 @@ export type SidebarTab =
   | 'penetration-test-enhanced' | 'monitoring' | 'e2e-test';
 
 const mainTabs = [
-  { id: 'genspark-page' as const, icon: Sparkles, label: '맞춤형 페이지 생성' },
   { id: 'blocks' as const, icon: Blocks, label: '블록' },
   { id: 'styles' as const, icon: Palette, label: '스타일' },
   { id: 'copilot' as const, icon: Bot, label: 'AI' },

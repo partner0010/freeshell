@@ -28,7 +28,6 @@ export function UserAnalytics() {
       { path: '/', views: 4520 },
       { path: '/editor', views: 3120 },
       { path: '/creator', views: 2890 },
-      { path: '/genspark', views: 2050 },
     ],
     userFlow: [
       { step: '방문', users: 1000 },

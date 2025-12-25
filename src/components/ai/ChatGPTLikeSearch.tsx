@@ -28,7 +28,7 @@ export function ChatGPTLikeSearch() {
     {
       id: '1',
       role: 'assistant',
-      content: '안녕하세요! 저는 SHELL입니다. 🐚✨\n\nCursor처럼 개발 언어를 지원하고, 나노바나나처럼 창의적인 콘텐츠를 생성할 수 있습니다! 🚀\n\n💡 지원 기능:\n- 📝 일반 질문 및 답변\n- 💻 코드 생성 (JavaScript, TypeScript, Python, React, Next.js 등)\n- 🔍 코드 분석 및 설명\n- 🐛 에러 디버깅 도움\n- 🔄 코드 자동 완성 및 제안\n- ✨ 리팩토링 지원\n- 🎨 창의적 콘텐츠 생성 (나노바나나 스타일)\n- 📚 최신 기술 트렌드 반영\n- 🖼️ 이미지 생성\n- 📄 파일 업로드 및 분석\n\n예시 질문:\n- "React로 Todo 앱 만들기"\n- "JavaScript 배열 메서드 설명해줘"\n- "창의적인 웹사이트 아이디어 줘"\n- "이 코드를 더 깔끔하게 리팩토링해줘"',
+      content: '안녕하세요! 저는 SHELL입니다. 🐚✨\n\nFreeshell의 AI 어시스턴트로, 여러분의 다양한 작업을 도와드립니다.\n\n💡 제가 도와드릴 수 있는 것들:\n- 📝 일반 질문 및 답변\n- 💻 코드 생성 및 분석 (JavaScript, TypeScript, Python, React, Next.js 등)\n- 🔍 코드 설명 및 디버깅 도움\n- 🔄 코드 리팩토링 및 최적화\n- 🎨 창의적 콘텐츠 생성\n- 📚 최신 기술 트렌드 정보 제공\n- 🖼️ 이미지 생성\n- 📄 파일 업로드 및 분석\n\n무엇을 도와드릴까요? 궁금한 것이 있으시면 언제든지 물어보세요! 😊',
       timestamp: new Date(),
     },
   ]);
@@ -48,6 +48,24 @@ export function ChatGPTLikeSearch() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // 키보드 단축키 지원 (최신 트렌드)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl/Cmd + K: 포커스 이동
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        inputRef.current?.focus();
+      }
+      // Escape: 입력창 비우기
+      if (e.key === 'Escape' && document.activeElement === inputRef.current) {
+        setInput('');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // 음성 인식 초기화
   useEffect(() => {
@@ -112,6 +130,16 @@ export function ChatGPTLikeSearch() {
       ? generateNanobananaPrompt(currentInput)
       : currentInput;
 
+    // 스켈레톤 메시지 추가 (로딩 중 표시)
+    const loadingMessage: Message = {
+      id: `loading-${Date.now()}`,
+      role: 'assistant',
+      content: '',
+      timestamp: new Date(),
+      type: 'text',
+    };
+    setMessages((prev) => [...prev, loadingMessage]);
+
     try {
       // 무료 AI API 호출
       const response = await fetch('/api/ai/chat', {
@@ -141,16 +169,19 @@ export function ChatGPTLikeSearch() {
       // 코드가 포함된 경우 타입 설정
       const hasCode = responseContent.includes('```') || detectedLanguage !== null;
       
-      const assistantMessage: Message = {
-        id: `assistant-${Date.now()}`,
-        role: 'assistant',
-        content: responseContent,
-        timestamp: new Date(),
-        type: hasCode ? 'code' : 'text',
-        code: hasCode ? responseContent : undefined,
-      };
-
-      setMessages((prev) => [...prev, assistantMessage]);
+      // 로딩 메시지 제거하고 실제 응답으로 교체
+      setMessages((prev) => {
+        const filtered = prev.filter(m => !m.id.startsWith('loading-'));
+        const assistantMessage: Message = {
+          id: `assistant-${Date.now()}`,
+          role: 'assistant',
+          content: responseContent,
+          timestamp: new Date(),
+          type: hasCode ? 'code' : 'text',
+          code: hasCode ? responseContent : undefined,
+        };
+        return [...filtered, assistantMessage];
+      });
     } catch (error: any) {
       const errorMessage: Message = {
         id: `error-${Date.now()}`,
@@ -243,20 +274,20 @@ export function ChatGPTLikeSearch() {
   };
 
   return (
-    <div className="flex flex-col h-full max-h-[600px] bg-white rounded-2xl shadow-xl border border-gray-200">
+    <div className="flex flex-col h-full max-h-[500px] sm:max-h-[600px] md:max-h-[700px] bg-white rounded-2xl shadow-xl border border-gray-200 w-full overflow-hidden">
       {/* 헤더 */}
-      <div className="p-4 border-b bg-gradient-to-r from-purple-50 to-pink-50">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-              <Sparkles className="text-white" size={20} />
+      <div className="p-3 sm:p-4 border-b bg-gradient-to-r from-purple-50 to-pink-50 flex-shrink-0">
+        <div className="flex items-center justify-between mb-2 sm:mb-3 gap-2">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Sparkles className="text-white" size={16} />
             </div>
-            <div>
-              <h2 className="font-bold text-gray-900">SHELL</h2>
-              <p className="text-xs text-gray-600">AI 어시스턴트 - 무료로 질문하고 답변받으세요</p>
+            <div className="min-w-0 flex-1">
+              <h2 className="font-bold text-gray-900 text-sm sm:text-base truncate">SHELL</h2>
+              <p className="text-xs text-gray-600 truncate">AI 어시스턴트 - 무료로 질문하고 답변받으세요</p>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-1 sm:gap-2 flex-shrink-0">
             <button
               onClick={() => setMode('chat')}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
@@ -303,9 +334,34 @@ export function ChatGPTLikeSearch() {
 
       {/* 메시지 영역 */}
       {mode === 'chat' && (
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 min-h-0">
         <AnimatePresence>
-          {messages.map((message) => (
+          {messages.map((message) => {
+            // 스켈레톤 로딩 메시지 처리
+            if (message.id.startsWith('loading-')) {
+              return (
+                <motion.div
+                  key={message.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="flex gap-3 justify-start"
+                >
+                  <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Bot className="text-white" size={16} />
+                  </div>
+                  <div className="max-w-[80%] rounded-2xl p-4 bg-gray-100 animate-pulse">
+                    <div className="flex gap-2">
+                      <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            }
+            
+            return (
             <motion.div
               key={message.id}
               initial={{ opacity: 0, y: 10 }}
@@ -316,15 +372,17 @@ export function ChatGPTLikeSearch() {
               }`}
             >
               {message.role === 'assistant' && (
-                <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Bot className="text-white" size={16} />
+                <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Bot className="text-white" size={14} />
                 </div>
               )}
-              <div
-                className={`max-w-[80%] rounded-2xl p-4 ${
+              <motion.div
+                initial={{ scale: 0.95 }}
+                animate={{ scale: 1 }}
+                className={`max-w-[85%] sm:max-w-[80%] rounded-2xl p-3 sm:p-4 ${
                   message.role === 'user'
-                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white'
-                    : 'bg-gray-100 text-gray-900'
+                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
+                    : 'bg-gray-100 text-gray-900 shadow-sm'
                 }`}
               >
                 {message.type === 'code' && message.code ? (
@@ -339,7 +397,7 @@ export function ChatGPTLikeSearch() {
                     </div>
                   </div>
                 ) : (
-                  <div className="whitespace-pre-wrap break-words">{message.content}</div>
+                  <div className="whitespace-pre-wrap break-words text-sm sm:text-base leading-relaxed">{message.content}</div>
                 )}
                 {message.role === 'assistant' && (
                   <button
@@ -350,14 +408,15 @@ export function ChatGPTLikeSearch() {
                     복사
                   </button>
                 )}
-              </div>
+              </motion.div>
               {message.role === 'user' && (
-                <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
-                  <User className="text-gray-600" size={16} />
+                <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
+                  <User className="text-gray-600" size={14} />
                 </div>
               )}
             </motion.div>
-          ))}
+            );
+          })}
         </AnimatePresence>
 
         {isLoading && (
@@ -380,36 +439,36 @@ export function ChatGPTLikeSearch() {
       )}
 
       {/* 입력 영역 */}
-      <div className="p-4 border-t bg-gray-50">
-        <div className="flex gap-2 mb-2">
-          <div className="flex-1 relative">
+      <div className="p-3 sm:p-4 border-t bg-gray-50 flex-shrink-0">
+        <div className="flex gap-1.5 sm:gap-2 mb-2">
+          <div className="flex-1 relative min-w-0">
             <textarea
               ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="메시지를 입력하세요... (Enter로 전송, Shift+Enter로 줄바꿈)"
-              className="w-full px-4 py-3 pr-20 border-2 border-gray-300 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none resize-none max-h-32"
+              placeholder="메시지를 입력하세요..."
+              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 pr-10 sm:pr-20 border-2 border-gray-300 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none resize-none max-h-32 text-sm sm:text-base min-w-0"
               rows={1}
             />
-            <div className="absolute right-2 top-2 flex gap-1">
+            <div className="absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 flex gap-0.5 sm:gap-1">
               <button
                 onClick={handleVoiceInput}
-                className={`p-2 rounded-lg transition-colors ${
+                className={`p-1.5 sm:p-2 rounded-lg transition-colors ${
                   isRecording 
                     ? 'bg-red-500 text-white animate-pulse' 
                     : 'text-gray-500 hover:bg-gray-100'
                 }`}
                 title="음성 입력"
               >
-                <Mic size={16} />
+                <Mic size={16} className="sm:w-5 sm:h-5" />
               </button>
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
+                className="p-1.5 sm:p-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
                 title="파일 업로드"
               >
-                <Upload size={16} />
+                <Upload size={16} className="sm:w-5 sm:h-5" />
               </button>
               <input
                 ref={fileInputRef}
@@ -423,13 +482,13 @@ export function ChatGPTLikeSearch() {
           <button
             onClick={handleSend}
             disabled={!input.trim() || isLoading}
-            className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center flex-shrink-0"
           >
-            <Send size={20} />
+            <Send size={18} className="sm:w-5 sm:h-5" />
           </button>
         </div>
-        <div className="flex items-center justify-between">
-          <p className="text-xs text-gray-500">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-1 sm:gap-2">
+          <p className="text-xs text-gray-500 text-center sm:text-left break-words px-2">
             무료 AI로 질문하고 답변받으세요. 회원가입 없이 사용 가능합니다.
           </p>
           <div className="flex gap-2 text-xs text-gray-500">

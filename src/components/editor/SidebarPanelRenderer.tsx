@@ -124,23 +124,10 @@ import { CodeValidatorPanel } from '../testing/CodeValidatorPanel';
 import { EnhancedPenetrationTestPanel } from '../security/EnhancedPenetrationTestPanel';
 import { MonitoringDashboard } from '../monitoring/MonitoringDashboard';
 import { E2ETestPanel } from '../testing/E2ETestPanel';
-import { GensparkSearch } from '@/components/ai/GensparkSearch';
 import { RealTimeCollaboration } from '@/components/collaboration/RealTimeCollaboration';
 
 export function renderSidebarPanel(activeTab: SidebarTab): React.ReactNode {
   switch (activeTab) {
-    case 'genspark-page':
-      return (
-        <div className="h-full flex flex-col">
-          <div className="p-4 border-b bg-gradient-to-r from-purple-50 to-pink-50">
-            <h2 className="text-lg font-bold text-gray-900 mb-2">맞춤형 페이지 생성</h2>
-            <p className="text-sm text-gray-600">GENSPARK AI로 검색하고 맞춤형 페이지를 생성하세요</p>
-          </div>
-          <div className="flex-1 overflow-auto p-4">
-            <GensparkSearch />
-          </div>
-        </div>
-      );
     case 'blocks':
       return <BlockPalette />;
     case 'styles':

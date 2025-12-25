@@ -83,29 +83,58 @@ for /f "tokens=*" %%i in ('git branch --show-current 2^>nul') do set current_bra
 if "%current_branch%"=="" (
     for /f "tokens=*" %%i in ('git rev-parse --abbrev-ref HEAD 2^>nul') do set current_branch=%%i
 )
-if "%current_branch%"=="" set current_branch=main
+if "%current_branch%"=="" set current_branch=master
 
 echo Current branch: %current_branch%
+echo.
+echo ========================================
+echo IMPORTANT: Netlify 배포 확인
+echo ========================================
+echo 1. netlify.toml이 프로젝트 루트에 있는지 확인하세요
+echo 2. Git 저장소가 GitHub와 연결되어 있는지 확인하세요
+echo 3. Netlify가 Git 저장소와 연결되어 있는지 확인하세요
+echo.
 echo Push to GitHub? (Y/N)
 set /p push_confirm=
 if /i "%push_confirm%"=="Y" (
+    echo.
+    echo Pushing to origin %current_branch%...
     git push origin %current_branch%
     if errorlevel 1 (
+        echo.
         echo [ERROR] Push failed!
-        echo Check branch name: git branch
-        echo Tried to push to: %current_branch%
+        echo.
+        echo Troubleshooting:
+        echo 1. Check branch name: git branch
+        echo 2. Check remote: git remote -v
+        echo 3. Tried to push to: %current_branch%
+        echo 4. If branch doesn't exist, create it: git push -u origin %current_branch%
+        echo.
         pause
         exit /b 1
     )
     echo.
     echo ========================================
     echo [SUCCESS] Push to GitHub completed!
+    echo ========================================
     echo.
-    echo If connected to Netlify/Vercel, deployment will start automatically.
-    echo Check deployment status in each platform's dashboard.
+    echo Next steps:
+    echo 1. Check Netlify dashboard: https://app.netlify.com
+    echo 2. Go to Deploys tab
+    echo 3. Wait for automatic deployment (usually 1-2 minutes)
+    echo 4. If no deployment appears, check:
+    echo    - Site settings ^> Build ^& deploy ^> Continuous Deployment
+    echo    - Repository connection
+    echo    - Branch name matches: %current_branch%
+    echo.
     echo ========================================
 ) else (
     echo Push skipped.
+    echo.
+    echo To deploy manually:
+    echo 1. Run: git push origin %current_branch%
+    echo 2. Or use Netlify CLI: netlify deploy --prod
+    echo 3. Or trigger deploy from Netlify dashboard
 )
 
 echo.
