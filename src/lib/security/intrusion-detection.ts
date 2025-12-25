@@ -143,8 +143,8 @@ export function trackRequest(request: NextRequest): {
 
   const alerts: IntrusionAlert[] = [];
 
-  // Rate Limiting: 1분에 100회 이상 요청
-  if (recentRequests.length > 100) {
+  // Rate Limiting: 1분에 200회 이상 요청 (완화)
+  if (recentRequests.length > 200) {
     tracker.blocked = true;
     tracker.blockUntil = new Date(Date.now() + 15 * 60 * 1000); // 15분 차단
 

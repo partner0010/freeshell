@@ -127,48 +127,63 @@ export async function middleware(request: NextRequest) {
   const skipSecurityScan = 
     pathname.startsWith('/_next/') ||
     pathname.startsWith('/api/healthcheck') ||
+    pathname === '/' ||
     pathname.match(/\.(ico|png|jpg|jpeg|gif|svg|webp|css|js|woff|woff2|ttf|eot)$/);
 
-  // 1. 취약점 스캔 (SQL Injection, XSS, CSRF 등) - 정적 파일 제외
-  if (!skipSecurityScan) {
+  // 1. 취약점 스캔 (SQL Injection, XSS, CSRF 등) - 정적 파일 및 루트 경로 제외
+  // 루트 경로(/)는 항상 허용
+  if (!skipSecurityScan && pathname !== '/') {
     const vulnerabilityCheck = validateRequest(request);
+    // Critical만 차단하고, 로그만 기록
     if (vulnerabilityCheck.blocked) {
-      // 취약점 발견 시 로그 기록
-      vulnerabilityCheck.vulnerabilities.forEach(v => {
-        logVulnerabilityReport(v);
-      });
-      
-      return new NextResponse(
-        JSON.stringify({ 
-          error: '보안 위협이 감지되었습니다.',
-          blocked: true 
-        }),
-        { 
-          status: 403,
-          headers: { 'Content-Type': 'application/json' }
-        }
+      // 취약점 발견 시 로그 기록만 (차단은 Critical만)
+      const criticalVulns = vulnerabilityCheck.vulnerabilities.filter(
+        v => v.severity === 'critical'
       );
+      
+      if (criticalVulns.length > 0) {
+        criticalVulns.forEach(v => {
+          logVulnerabilityReport(v);
+        });
+        
+        return new NextResponse(
+          JSON.stringify({ 
+            error: '보안 위협이 감지되었습니다.',
+            blocked: true 
+          }),
+          { 
+            status: 403,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+      }
     }
   }
 
-  // 2. 침입 탐지 시스템 (IDS)
-  const intrusionCheck = trackRequest(request);
-  if (!intrusionCheck.allowed) {
-    // 침입 시도 로그 기록
-    intrusionCheck.alerts.forEach(alert => {
-      logIntrusionAlert(alert);
-    });
-    
-    return new NextResponse(
-      JSON.stringify({ 
-        error: '의심스러운 활동이 감지되어 접근이 차단되었습니다.',
-        blocked: true 
-      }),
-      { 
-        status: 403,
-        headers: { 'Content-Type': 'application/json' }
+  // 2. 침입 탐지 시스템 (IDS) - 루트 경로는 제외
+  if (pathname !== '/') {
+    const intrusionCheck = trackRequest(request);
+    // 실제 차단된 경우만 차단 (경고는 로그만)
+    if (!intrusionCheck.allowed) {
+      const blockedAlerts = intrusionCheck.alerts.filter(a => a.blocked);
+      if (blockedAlerts.length > 0) {
+        // 침입 시도 로그 기록
+        blockedAlerts.forEach(alert => {
+          logIntrusionAlert(alert);
+        });
+        
+        return new NextResponse(
+          JSON.stringify({ 
+            error: '의심스러운 활동이 감지되어 접근이 차단되었습니다.',
+            blocked: true 
+          }),
+          { 
+            status: 403,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
       }
-    );
+    }
   }
 
   // 3. AI Security Guard - 실시간 위협 감지 및 차단
