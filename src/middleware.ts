@@ -123,24 +123,32 @@ export async function middleware(request: NextRequest) {
   const ip = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
   const userAgent = request.headers.get('user-agent') || '';
 
-  // 1. 취약점 스캔 (SQL Injection, XSS, CSRF 등)
-  const vulnerabilityCheck = validateRequest(request);
-  if (vulnerabilityCheck.blocked) {
-    // 취약점 발견 시 로그 기록
-    vulnerabilityCheck.vulnerabilities.forEach(v => {
-      logVulnerabilityReport(v);
-    });
-    
-    return new NextResponse(
-      JSON.stringify({ 
-        error: '보안 위협이 감지되었습니다.',
-        blocked: true 
-      }),
-      { 
-        status: 403,
-        headers: { 'Content-Type': 'application/json' }
-      }
-    );
+  // 정적 파일 및 Next.js 내부 경로는 스캔 제외
+  const skipSecurityScan = 
+    pathname.startsWith('/_next/') ||
+    pathname.startsWith('/api/healthcheck') ||
+    pathname.match(/\.(ico|png|jpg|jpeg|gif|svg|webp|css|js|woff|woff2|ttf|eot)$/);
+
+  // 1. 취약점 스캔 (SQL Injection, XSS, CSRF 등) - 정적 파일 제외
+  if (!skipSecurityScan) {
+    const vulnerabilityCheck = validateRequest(request);
+    if (vulnerabilityCheck.blocked) {
+      // 취약점 발견 시 로그 기록
+      vulnerabilityCheck.vulnerabilities.forEach(v => {
+        logVulnerabilityReport(v);
+      });
+      
+      return new NextResponse(
+        JSON.stringify({ 
+          error: '보안 위협이 감지되었습니다.',
+          blocked: true 
+        }),
+        { 
+          status: 403,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
   }
 
   // 2. 침입 탐지 시스템 (IDS)
