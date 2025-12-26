@@ -20,7 +20,7 @@ import { StructuredData } from '@/components/seo/StructuredData';
 export default function HomePage() {
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white overflow-x-hidden">
       {/* 구조화된 데이터 */}
       <StructuredData 
         type="WebPage" 
@@ -35,11 +35,7 @@ export default function HomePage() {
       <GlobalHeader />
 
       {/* 히어로 섹션 - SHELL AI 통합 */}
-      <section className="pt-6 sm:pt-8 md:pt-12 lg:pt-16 pb-8 sm:pb-12 md:pb-16 px-3 sm:px-4 md:px-6 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-50/50 via-white to-blue-50/50" />
-        <div className="absolute top-0 right-0 w-64 h-64 sm:w-96 sm:h-96 bg-purple-200/30 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 sm:w-96 sm:h-96 bg-blue-200/30 rounded-full blur-3xl" />
-        
+      <section className="pt-6 sm:pt-8 md:pt-12 lg:pt-16 pb-8 sm:pb-12 md:pb-16 px-3 sm:px-4 md:px-6 relative overflow-hidden bg-white">
         <div className="max-w-6xl mx-auto relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -82,7 +78,7 @@ export default function HomePage() {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="mb-8"
           >
-            <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-xl sm:rounded-2xl shadow-xl border border-gray-200/80 dark:border-gray-700/80 p-4 sm:p-6 max-w-4xl mx-auto w-full supports-[backdrop-filter]:bg-white/80 supports-[backdrop-filter]:dark:bg-gray-900/80">
+            <div className="bg-white dark:bg-gray-900 rounded-xl sm:rounded-2xl shadow-xl border border-gray-200/80 dark:border-gray-700/80 p-4 sm:p-6 max-w-4xl mx-auto w-full">
               <div className="flex items-center justify-between mb-3 sm:mb-4 gap-2">
                 <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                   <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center flex-shrink-0">

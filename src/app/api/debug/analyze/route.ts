@@ -1,47 +1,125 @@
 /**
  * 코드 분석 API
+ * URL 또는 파일 내용을 받아서 디버깅 수행
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const { code } = await request.json();
+    const { type, url, content, fileName } = await request.json();
 
-    if (!code || typeof code !== 'string') {
+    let code = '';
+
+    // URL 또는 파일 내용 처리
+    if (type === 'url') {
+      if (!url || typeof url !== 'string') {
+        return NextResponse.json(
+          { error: 'URL을 입력하세요.' },
+          { status: 400 }
+        );
+      }
+      // URL에서 코드 가져오기 (실제로는 fetch로 가져와야 함)
+      try {
+        const response = await fetch(url);
+        code = await response.text();
+      } catch (error) {
+        return NextResponse.json(
+          { error: 'URL에서 코드를 가져올 수 없습니다.' },
+          { status: 400 }
+        );
+      }
+    } else if (type === 'file') {
+      if (!content || typeof content !== 'string') {
+        return NextResponse.json(
+          { error: '파일 내용을 입력하세요.' },
+          { status: 400 }
+        );
+      }
+      code = content;
+    } else {
       return NextResponse.json(
-        { error: '코드를 입력하세요.' },
+        { error: '유효하지 않은 입력 타입입니다.' },
         { status: 400 }
       );
     }
 
-    // 간단한 코드 분석 (실제로는 더 정교한 분석 필요)
-    const errors: string[] = [];
-    const warnings: string[] = [];
-    const suggestions: string[] = [];
+    if (!code.trim()) {
+      return NextResponse.json(
+        { error: '분석할 코드가 없습니다.' },
+        { status: 400 }
+      );
+    }
+
+    // 코드 분석
+    const results: Array<{
+      type: 'error' | 'warning' | 'info' | 'success';
+      message: string;
+      location?: string;
+      suggestion?: string;
+    }> = [];
 
     // 기본 검사
     if (code.includes('console.log')) {
-      warnings.push('프로덕션 코드에서 console.log 사용을 피하세요.');
+      results.push({
+        type: 'warning',
+        message: '프로덕션 코드에서 console.log 사용을 피하세요.',
+        location: fileName || '코드',
+        suggestion: 'console.log를 제거하거나 프로덕션 빌드에서 자동 제거되도록 설정하세요.',
+      });
     }
 
     if (code.includes('eval(')) {
-      errors.push('eval() 사용은 보안 위험이 있습니다.');
+      results.push({
+        type: 'error',
+        message: 'eval() 사용은 보안 위험이 있습니다.',
+        location: fileName || '코드',
+        suggestion: 'eval() 대신 JSON.parse() 또는 다른 안전한 방법을 사용하세요.',
+      });
     }
 
     if (code.includes('var ')) {
-      suggestions.push('var 대신 const 또는 let을 사용하세요.');
+      results.push({
+        type: 'info',
+        message: 'var 대신 const 또는 let을 사용하는 것을 권장합니다.',
+        location: fileName || '코드',
+        suggestion: 'var를 const 또는 let으로 변경하여 스코프 문제를 방지하세요.',
+      });
     }
 
     if (!code.includes('try') && code.includes('await')) {
-      suggestions.push('비동기 코드에 에러 핸들링을 추가하세요.');
+      results.push({
+        type: 'warning',
+        message: '비동기 코드에 에러 핸들링이 없습니다.',
+        location: fileName || '코드',
+        suggestion: 'try-catch 블록을 추가하여 에러를 처리하세요.',
+      });
+    }
+
+    // 구문 오류 검사 (간단한 예시)
+    const openBraces = (code.match(/{/g) || []).length;
+    const closeBraces = (code.match(/}/g) || []).length;
+    if (openBraces !== closeBraces) {
+      results.push({
+        type: 'error',
+        message: '중괄호가 일치하지 않습니다.',
+        location: fileName || '코드',
+        suggestion: '모든 중괄호가 올바르게 닫혔는지 확인하세요.',
+      });
+    }
+
+    // 성공 메시지
+    if (results.length === 0) {
+      results.push({
+        type: 'success',
+        message: '코드에 명백한 오류가 발견되지 않았습니다.',
+        location: fileName || '코드',
+      });
     }
 
     const result = {
       success: true,
-      errors,
-      warnings,
-      suggestions,
+      results,
     };
 
     // 도메인별 학습 시스템에 상호작용 기록

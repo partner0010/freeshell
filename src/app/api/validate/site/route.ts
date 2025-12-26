@@ -1,12 +1,49 @@
 /**
  * 사이트 검증 API
- * 운영 사이트 전반 기술 확인
+ * URL 또는 파일을 받아서 사이트 검증 수행
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
+    const { type, url, content, fileName } = await request.json();
+
+    let siteContent = '';
+
+    // URL 또는 파일 내용 처리
+    if (type === 'url') {
+      if (!url || typeof url !== 'string') {
+        return NextResponse.json(
+          { error: 'URL을 입력하세요.' },
+          { status: 400 }
+        );
+      }
+      // URL에서 사이트 내용 가져오기 (실제로는 fetch로 가져와야 함)
+      try {
+        const response = await fetch(url);
+        siteContent = await response.text();
+      } catch (error) {
+        return NextResponse.json(
+          { error: 'URL에서 사이트를 가져올 수 없습니다.' },
+          { status: 400 }
+        );
+      }
+    } else if (type === 'file') {
+      if (!content || typeof content !== 'string') {
+        return NextResponse.json(
+          { error: '파일 내용을 입력하세요.' },
+          { status: 400 }
+        );
+      }
+      siteContent = content;
+    } else {
+      return NextResponse.json(
+        { error: '유효하지 않은 입력 타입입니다.' },
+        { status: 400 }
+      );
+    }
+
     // 실제로는 다양한 검증 도구를 사용하여 사이트를 검증
     // 여기서는 시뮬레이션
 
