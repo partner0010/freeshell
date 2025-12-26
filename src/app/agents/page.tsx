@@ -152,6 +152,238 @@ export default function AgentsPage() {
           })}
         </div>
 
+        {/* 콘텐츠 생성 탭 */}
+        {activeTab === 'create' && (
+          <div className="space-y-6 mb-12">
+            <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-200">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">콘텐츠 생성</h2>
+              <p className="text-gray-600 mb-8">원하는 콘텐츠 타입을 선택하고 생성하세요</p>
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                {[
+                  { 
+                    id: 'video', 
+                    name: '영상 생성', 
+                    icon: Video, 
+                    color: 'from-red-500 to-pink-500',
+                    description: 'AI로 영상 콘텐츠 생성'
+                  },
+                  { 
+                    id: 'image', 
+                    name: '이미지 생성', 
+                    icon: Image, 
+                    color: 'from-purple-500 to-indigo-500',
+                    description: 'AI로 이미지 생성'
+                  },
+                  { 
+                    id: 'text', 
+                    name: '텍스트 생성', 
+                    icon: Type, 
+                    color: 'from-blue-500 to-cyan-500',
+                    description: 'AI로 텍스트 콘텐츠 생성'
+                  },
+                  { 
+                    id: 'code', 
+                    name: '코드 생성', 
+                    icon: Code, 
+                    color: 'from-green-500 to-emerald-500',
+                    description: 'AI로 코드 생성'
+                  },
+                  { 
+                    id: 'audio', 
+                    name: '음성 생성', 
+                    icon: Mic, 
+                    color: 'from-orange-500 to-red-500',
+                    description: 'AI로 음성 생성'
+                  },
+                  { 
+                    id: 'music', 
+                    name: '노래 생성', 
+                    icon: Music, 
+                    color: 'from-pink-500 to-rose-500',
+                    description: 'AI로 음악 생성'
+                  },
+                  { 
+                    id: 'ebook', 
+                    name: '전자책 생성', 
+                    icon: BookOpen, 
+                    color: 'from-indigo-500 to-purple-500',
+                    description: 'AI로 전자책 생성'
+                  },
+                  { 
+                    id: 'blog', 
+                    name: '블로그 포스팅', 
+                    icon: FileEdit, 
+                    color: 'from-teal-500 to-green-500',
+                    description: 'AI로 블로그 포스팅 생성'
+                  },
+                ].map((contentType) => {
+                  const Icon = contentType.icon;
+                  return (
+                    <motion.button
+                      key={contentType.id}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setSelectedContentType(contentType.id)}
+                      className={`p-6 rounded-2xl border-2 transition-all ${
+                        selectedContentType === contentType.id
+                          ? 'border-purple-500 shadow-lg'
+                          : 'border-gray-200 hover:border-purple-300'
+                      }`}
+                    >
+                      <div className={`w-12 h-12 bg-gradient-to-br ${contentType.color} rounded-xl flex items-center justify-center mb-4 mx-auto`}>
+                        <Icon className="text-white" size={24} />
+                      </div>
+                      <h3 className="font-bold text-gray-900 mb-1 text-center">{contentType.name}</h3>
+                      <p className="text-xs text-gray-500 text-center">{contentType.description}</p>
+                    </motion.button>
+                  );
+                })}
+              </div>
+
+              {/* 선택된 콘텐츠 타입에 대한 생성 폼 */}
+              {selectedContentType && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-8 p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl border-2 border-purple-200"
+                >
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">
+                    {selectedContentType === 'video' && '영상 생성'}
+                    {selectedContentType === 'image' && '이미지 생성'}
+                    {selectedContentType === 'text' && '텍스트 생성'}
+                    {selectedContentType === 'code' && '코드 생성'}
+                    {selectedContentType === 'audio' && '음성 생성'}
+                    {selectedContentType === 'music' && '노래 생성'}
+                    {selectedContentType === 'ebook' && '전자책 생성'}
+                    {selectedContentType === 'blog' && '블로그 포스팅 생성'}
+                  </h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        {selectedContentType === 'video' && '영상 주제 또는 스크립트'}
+                        {selectedContentType === 'image' && '이미지 설명'}
+                        {selectedContentType === 'text' && '텍스트 주제'}
+                        {selectedContentType === 'code' && '코드 요구사항'}
+                        {selectedContentType === 'audio' && '음성 텍스트'}
+                        {selectedContentType === 'music' && '노래 주제 또는 스타일'}
+                        {selectedContentType === 'ebook' && '전자책 주제'}
+                        {selectedContentType === 'blog' && '블로그 포스팅 주제'}
+                      </label>
+                      <textarea
+                        value={taskInput}
+                        onChange={(e) => setTaskInput(e.target.value)}
+                        placeholder={
+                          selectedContentType === 'video' ? '예: "고양이의 일상 생활에 대한 3분 영상"'
+                          : selectedContentType === 'image' ? '예: "태양이 지는 해변의 풍경"'
+                          : selectedContentType === 'text' ? '예: "AI의 미래에 대한 기사"'
+                          : selectedContentType === 'code' ? '예: "React로 Todo 앱 만들기"'
+                          : selectedContentType === 'audio' ? '예: "안녕하세요, 오늘 날씨가 좋네요"'
+                          : selectedContentType === 'music' ? '예: "신나는 팝송 스타일의 노래"'
+                          : selectedContentType === 'ebook' ? '예: "초보자를 위한 프로그래밍 가이드"'
+                          : '예: "최신 AI 트렌드에 대한 블로그 포스팅"'
+                        }
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none min-h-[120px]"
+                      />
+                    </div>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={async () => {
+                          if (!taskInput.trim()) {
+                            alert('내용을 입력하세요.');
+                            return;
+                          }
+                          
+                          setIsExecuting(true);
+                          
+                          try {
+                            // 콘텐츠 타입에 맞는 에이전트 찾기 또는 생성
+                            let agent = agents.find(a => 
+                              (selectedContentType === 'video' && a.capabilities.includes('video-generation')) ||
+                              (selectedContentType === 'image' && a.capabilities.includes('image-generation')) ||
+                              (selectedContentType === 'text' && a.capabilities.includes('text-generation')) ||
+                              (selectedContentType === 'code' && a.capabilities.includes('code-generation')) ||
+                              (selectedContentType === 'audio' && a.capabilities.includes('audio-generation')) ||
+                              (selectedContentType === 'music' && a.capabilities.includes('music-generation')) ||
+                              (selectedContentType === 'ebook' && a.capabilities.includes('ebook-generation')) ||
+                              (selectedContentType === 'blog' && a.capabilities.includes('blog-generation'))
+                            );
+                            
+                            if (!agent) {
+                              // 기본 콘텐츠 생성 에이전트 사용
+                              agent = agents.find(a => a.id === 'content-agent') || agents[0];
+                            }
+                            
+                            if (!agent) {
+                              alert('사용 가능한 에이전트가 없습니다.');
+                              setIsExecuting(false);
+                              return;
+                            }
+                            
+                            const task = agentManager.createTask({
+                              agentId: agent.id,
+                              type: 'generate',
+                              input: { 
+                                prompt: taskInput,
+                                contentType: selectedContentType,
+                              },
+                            });
+
+                            const newTasks = [...tasks, task];
+                            setTasks(newTasks);
+                            setTaskInput('');
+                            setActiveTab('history');
+                            
+                            agentManager.executeTask(task.id)
+                              .then((result) => {
+                                console.log('콘텐츠 생성 완료:', result);
+                                loadTasks();
+                                setIsExecuting(false);
+                              })
+                              .catch((error: any) => {
+                                console.error('콘텐츠 생성 오류:', error);
+                                alert(`콘텐츠 생성 중 오류가 발생했습니다: ${error?.message || '알 수 없는 오류'}`);
+                                loadTasks();
+                                setIsExecuting(false);
+                              });
+                          } catch (error: any) {
+                            console.error('작업 생성 오류:', error);
+                            alert(`작업 생성 중 오류가 발생했습니다: ${error?.message || '알 수 없는 오류'}`);
+                            setIsExecuting(false);
+                          }
+                        }}
+                        disabled={!taskInput.trim() || isExecuting}
+                        className="flex-1 px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                        {isExecuting ? (
+                          <>
+                            <Loader2 className="animate-spin" size={20} />
+                            생성 중...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles size={20} />
+                            생성하기
+                          </>
+                        )}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedContentType(null);
+                          setTaskInput('');
+                        }}
+                        className="px-6 py-4 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-all"
+                      >
+                        취소
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* 워크플로우 탭 */}
         {activeTab === 'workflows' && (
           <div className="space-y-6 mb-12">

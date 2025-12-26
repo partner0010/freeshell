@@ -104,10 +104,20 @@ export async function POST(request: NextRequest) {
         break;
       }
 
-      case 'audio':
+      case 'audio': {
+        // 음성 나레이션 생성
+        result = {
+          type: 'audio',
+          message: '음성 생성은 별도 API를 사용하세요.',
+          prompt: topic,
+        };
+        break;
+      }
+
       case 'music': {
         const musicGen = new MusicGenerator();
         const track = await musicGen.generateMusic({
+          topic,
           genre: options?.genre || 'electronic',
           mood: options?.mood || 'energetic',
           duration: options?.duration || 60,
@@ -115,6 +125,7 @@ export async function POST(request: NextRequest) {
           instruments: options?.instruments || ['synthesizer', 'drums'],
           vocals: options?.vocals || false,
           style: options?.style || 'modern',
+          service: 'remusic', // Remusic, AnyMusic, MSong.ai 중 선택
         });
         result = {
           type: 'music',
@@ -123,6 +134,32 @@ export async function POST(request: NextRequest) {
           genre: track.genre,
           mood: track.mood,
           metadata: track.metadata,
+          url: track.url,
+        };
+        break;
+      }
+
+      case 'song': {
+        const musicGen = new MusicGenerator();
+        const song = await musicGen.generateSong({
+          topic,
+          lyrics: options?.lyrics || topic,
+          genre: options?.genre || 'pop',
+          mood: options?.mood || 'happy',
+          duration: options?.duration || 180,
+          tempo: options?.tempo || 'medium',
+          style: options?.style || 'modern',
+          service: 'aisongmaker', // AI Song Maker, MusicHero.ai 중 선택
+        });
+        result = {
+          type: 'song',
+          song,
+          title: song.title,
+          lyrics: song.lyrics,
+          genre: song.genre,
+          mood: song.mood,
+          metadata: song.metadata,
+          url: song.url,
         };
         break;
       }

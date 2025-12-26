@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  Video, Image, BookOpen, FileText, Mic, Sparkles,
+  Video, Image, BookOpen, FileText, Mic, Sparkles, Music,
   Play, Download, Globe, Zap, Settings, ArrowRight, Calendar, Clock, Layers, CheckSquare
 } from 'lucide-react';
 import Link from 'next/link';
@@ -63,6 +63,20 @@ export default function CreatorPage() {
       icon: Mic,
       description: 'SUPERTONE AI 나레이션 생성',
       color: 'from-indigo-500 to-purple-500',
+    },
+    {
+      id: 'music',
+      name: '음악 생성',
+      icon: Music,
+      description: 'AI로 음악 및 노래 생성 (Remusic, AnyMusic, MSong.ai)',
+      color: 'from-pink-500 to-rose-500',
+    },
+    {
+      id: 'song',
+      name: '노래 생성',
+      icon: Music,
+      description: '가사에서 노래 생성 (AI Song Maker, MusicHero.ai)',
+      color: 'from-purple-500 to-indigo-500',
     },
   ];
 

@@ -7,7 +7,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { Globe, Check } from 'lucide-react';
-import { i18n, type Locale } from '@/lib/i18n';
+import { type Locale } from '@/lib/i18n';
+import { useLanguage } from './LanguageProvider';
 
 const languages: { code: Locale; name: string; flag: string }[] = [
   { code: 'ko', name: '한국어', flag: '🇰🇷' },
@@ -19,22 +20,23 @@ const languages: { code: Locale; name: string; flag: string }[] = [
 ];
 
 export function LanguageSelector() {
-  const [currentLocale, setCurrentLocale] = useState<Locale>(i18n.getLocale());
+  const { locale, setLocale } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    setCurrentLocale(i18n.getLocale());
+    const handleLanguageChange = () => {
+      // 언어 변경 이벤트 리스너
+    };
+    window.addEventListener('languagechange', handleLanguageChange);
+    return () => window.removeEventListener('languagechange', handleLanguageChange);
   }, []);
 
-  const handleLanguageChange = (locale: Locale) => {
-    i18n.setLocale(locale);
-    setCurrentLocale(locale);
+  const handleLanguageChange = (newLocale: Locale) => {
+    setLocale(newLocale);
     setIsOpen(false);
-    // 페이지 새로고침으로 언어 변경 적용
-    window.location.reload();
   };
 
-  const currentLanguage = languages.find(lang => lang.code === currentLocale);
+  const currentLanguage = languages.find(lang => lang.code === locale);
 
   return (
     <div className="relative">
@@ -56,14 +58,14 @@ export function LanguageSelector() {
                 key={lang.code}
                 onClick={() => handleLanguageChange(lang.code)}
                 className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
-                  currentLocale === lang.code
+                  locale === lang.code
                     ? 'bg-purple-50 text-purple-700'
                     : 'hover:bg-gray-50 text-gray-700'
                 }`}
               >
                 <span className="text-xl">{lang.flag}</span>
                 <span className="flex-1 font-medium">{lang.name}</span>
-                {currentLocale === lang.code && (
+                {locale === lang.code && (
                   <Check size={16} className="text-purple-600" />
                 )}
               </button>
