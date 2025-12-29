@@ -3,7 +3,7 @@
 # Domain: freeshell.co.kr
 
 [build]
-  # 빌드 명령어
+  # 빌드 명령어 (Prisma 제거됨 - 사용하지 않음)
   command = "npm run build"
   
   # Node.js 버전
