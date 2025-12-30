@@ -134,10 +134,24 @@ echo.
 echo [2/4] 빌드 테스트...
 echo.
 
-REM .next 폴더 정리
+REM .next 폴더 정리 (더 강력한 삭제)
 if exist ".next" (
     echo .next 폴더 삭제 중...
+    echo [DEBUG] .next 폴더 삭제 시작 >> "!LOG_FILE!"
+    REM 여러 번 시도하여 완전히 삭제
     rmdir /s /q .next 2>nul
+    timeout /t 1 /nobreak >nul 2>&1
+    if exist ".next" (
+        rmdir /s /q .next 2>nul
+        timeout /t 1 /nobreak >nul 2>&1
+    )
+    if exist ".next" (
+        echo [WARNING] .next 폴더 삭제 실패, 계속 진행합니다...
+        echo [WARNING] .next 폴더 삭제 실패, 계속 진행합니다... >> "!LOG_FILE!"
+    ) else (
+        echo [OK] .next 폴더 삭제 완료
+        echo [OK] .next 폴더 삭제 완료 >> "!LOG_FILE!"
+    )
 )
 
 echo 빌드 시작 (몇 분 소요될 수 있습니다)...
