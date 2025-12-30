@@ -323,11 +323,9 @@ set "BRANCH_CHECK=!CURRENT_BRANCH!"
 echo [DEBUG] 브랜치 확인 변수: "!BRANCH_CHECK!"
 
 REM master 브랜치인 경우 main 브랜치로도 푸시 (Netlify용)
-set "IS_MASTER=0"
-if /i "!BRANCH_CHECK!"=="master" set "IS_MASTER=1"
-echo [DEBUG] IS_MASTER 변수 값: !IS_MASTER!
-
-if !IS_MASTER!==1 (
+echo [DEBUG] master 브랜치 조건 확인 중...
+echo [DEBUG] 조건문 실행 직전...
+if /i "!BRANCH_CHECK!"=="master" (
     echo [DEBUG] master 브랜치 확인됨 - 4-4 단계 시작
     echo.
     echo [DEBUG] 단계 4-4: main 브랜치로 푸시 시작 (Netlify용)...
@@ -380,6 +378,7 @@ if !IS_MASTER!==1 (
 ) else (
     echo [DEBUG] master 브랜치가 아니므로 main 브랜치 푸시를 건너뜁니다.
     echo [DEBUG] 현재 브랜치: "!BRANCH_CHECK!"
+    echo [DEBUG] master가 아니므로 4-4 단계 건너뜀
     echo.
 )
 echo [DEBUG] 4-4 단계 처리 완료 (성공 또는 건너뜀)

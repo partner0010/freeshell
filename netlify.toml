@@ -5,6 +5,8 @@
 [build]
   # 빌드 명령어 (Prisma 제거됨 - 사용하지 않음)
   command = "npm run build"
+  base = "."
+  publish = ".next"
   
   # Node.js 버전
   [build.environment]
