@@ -254,7 +254,7 @@ echo.
 echo [DEBUG] git push -u origin !CURRENT_BRANCH! --force-with-lease 실행 중...
 echo [주의] 이 작업은 몇 초에서 몇 분이 걸릴 수 있습니다...
 call git push -u origin !CURRENT_BRANCH! --force-with-lease 2>&1
-set PUSH_ERROR=%ERRORLEVEL%
+set PUSH_ERROR=!ERRORLEVEL!
 echo.
 echo [DEBUG] git push 명령어 실행 완료, 에러 레벨: !PUSH_ERROR!
 if !PUSH_ERROR! NEQ 0 (
@@ -265,7 +265,7 @@ if !PUSH_ERROR! NEQ 0 (
     echo [DEBUG] 일반 푸시 시도 시작...
     echo 일반 푸시를 시도합니다...
     call git push -u origin !CURRENT_BRANCH! 2>&1
-    set PUSH_ERROR=%ERRORLEVEL%
+    set PUSH_ERROR=!ERRORLEVEL!
     echo [DEBUG] 일반 푸시 실행 완료, 에러 레벨: !PUSH_ERROR!
     if !PUSH_ERROR! NEQ 0 (
         set PUSH_ERROR=1
@@ -280,7 +280,7 @@ if !PUSH_ERROR! NEQ 0 (
             echo [DEBUG] force push 실행 시작...
             echo force push 실행 중...
             call git push -u origin !CURRENT_BRANCH! --force 2>&1
-            set PUSH_ERROR=%ERRORLEVEL%
+            set PUSH_ERROR=!ERRORLEVEL!
             echo [DEBUG] force push 실행 완료, 에러 레벨: !PUSH_ERROR!
             if !PUSH_ERROR! NEQ 0 (
                 echo.
@@ -311,11 +311,13 @@ if !PUSH_ERROR! NEQ 0 (
         echo [DEBUG] 일반 푸시 성공
     )
 ) else (
+    echo [DEBUG] force-with-lease 푸시 성공 블록 실행 중...
     set PUSH_ERROR=0
     echo [OK] force-with-lease 푸시 성공!
     echo [DEBUG] force-with-lease 푸시 성공
+    echo [DEBUG] 성공 블록 완료
 )
-echo [DEBUG] 브랜치 푸시 단계 완료
+echo [DEBUG] 브랜치 푸시 단계 완료 - if 문 이후
 echo.
 
 REM master 브랜치인 경우 main 브랜치로도 푸시 (Netlify용)
@@ -330,7 +332,7 @@ if /i "!CURRENT_BRANCH!"=="master" (
     echo [DEBUG] git push origin master:main --force-with-lease 실행 중...
     echo [주의] 이 작업은 몇 초에서 몇 분이 걸릴 수 있습니다...
     call git push origin master:main --force-with-lease 2>&1
-    set MAIN_PUSH_ERROR=%ERRORLEVEL%
+    set MAIN_PUSH_ERROR=!ERRORLEVEL!
     echo.
     echo [DEBUG] git push 명령어 실행 완료, 에러 레벨: !MAIN_PUSH_ERROR!
     if !MAIN_PUSH_ERROR! NEQ 0 (
@@ -338,14 +340,14 @@ if /i "!CURRENT_BRANCH!"=="master" (
         echo [DEBUG] 일반 push 시도 시작...
         echo 일반 push 시도 중...
         call git push origin master:main 2>&1
-        set MAIN_PUSH_ERROR=%ERRORLEVEL%
+        set MAIN_PUSH_ERROR=!ERRORLEVEL!
         echo [DEBUG] 일반 push 실행 완료, 에러 레벨: !MAIN_PUSH_ERROR!
         if !MAIN_PUSH_ERROR! NEQ 0 (
             echo [WARNING] 일반 push 실패 (에러 레벨: !MAIN_PUSH_ERROR!)
             echo [DEBUG] force push 시도 시작...
             echo force push 시도 중...
             call git push origin master:main --force 2>&1
-            set MAIN_PUSH_ERROR=%ERRORLEVEL%
+            set MAIN_PUSH_ERROR=!ERRORLEVEL!
             echo [DEBUG] force push 실행 완료, 에러 레벨: !MAIN_PUSH_ERROR!
             if !MAIN_PUSH_ERROR! NEQ 0 (
                 echo.
