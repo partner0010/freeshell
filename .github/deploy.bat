@@ -317,14 +317,18 @@ echo [DEBUG] 브랜치 푸시 단계 완료 - if 문 이후
 echo.
 echo [DEBUG] 4-3 단계 완료, 4-4 단계로 이동 전 확인...
 echo [DEBUG] 현재 브랜치 변수 값: "!CURRENT_BRANCH!"
-echo [DEBUG] master 브랜치 조건 확인 중...
-echo [DEBUG] 조건문 실행 전 확인 완료
+
+REM 변수를 명확히 설정
+set "BRANCH_CHECK=!CURRENT_BRANCH!"
+echo [DEBUG] 브랜치 확인 변수: "!BRANCH_CHECK!"
 
 REM master 브랜치인 경우 main 브랜치로도 푸시 (Netlify용)
-echo [DEBUG] if 문 시작...
-if /i "!CURRENT_BRANCH!"=="master" (
-    echo [DEBUG] if 문 조건 만족 - master 브랜치 확인됨
-    echo [DEBUG] master 브랜치 조건 만족 - 4-4 단계 시작
+set "IS_MASTER=0"
+if /i "!BRANCH_CHECK!"=="master" set "IS_MASTER=1"
+echo [DEBUG] IS_MASTER 변수 값: !IS_MASTER!
+
+if !IS_MASTER!==1 (
+    echo [DEBUG] master 브랜치 확인됨 - 4-4 단계 시작
     echo.
     echo [DEBUG] 단계 4-4: main 브랜치로 푸시 시작 (Netlify용)...
     echo main 브랜치로도 푸시 중 (Netlify용)...
@@ -372,16 +376,13 @@ if /i "!CURRENT_BRANCH!"=="master" (
     )
     echo [DEBUG] main 브랜치 푸시 단계 완료
     echo.
-    echo [DEBUG] if 문 내부 완료
+    echo [DEBUG] 4-4 단계 완료
 ) else (
-    echo [DEBUG] if 문 else 블록 실행
-    echo [DEBUG] 현재 브랜치가 master가 아니므로 main 브랜치 푸시를 건너뜁니다.
-    echo [DEBUG] 현재 브랜치 값: "!CURRENT_BRANCH!"
-    echo [DEBUG] 조건: master와 비교
+    echo [DEBUG] master 브랜치가 아니므로 main 브랜치 푸시를 건너뜁니다.
+    echo [DEBUG] 현재 브랜치: "!BRANCH_CHECK!"
     echo.
 )
-echo [DEBUG] if 문 완료
-echo [DEBUG] 4-4 단계 완료 (또는 건너뜀)
+echo [DEBUG] 4-4 단계 처리 완료 (성공 또는 건너뜀)
 echo.
 
 echo [DEBUG] 모든 단계 완료!
