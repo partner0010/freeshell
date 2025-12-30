@@ -264,13 +264,30 @@ if /i "%push_confirm%"=="Y" (
     if /i "%current_branch%"=="master" (
         echo.
         echo Also pushing to 'main' branch for Netlify deployment...
-        call git push origin master:main
+        call git push origin master:main --force-with-lease
         if errorlevel 1 (
-            echo [WARNING] Failed to push to main branch, but master push succeeded.
-            echo You may need to set Netlify Production branch to 'master' or manually push to main.
+            echo [WARNING] Force push failed, trying regular push...
+            call git push origin master:main
+            if errorlevel 1 (
+                echo [ERROR] Failed to push to main branch!
+                echo.
+                echo This is critical - Netlify monitors the 'main' branch.
+                echo Please check:
+                echo 1. GitHub authentication
+                echo 2. Repository permissions
+                echo 3. Branch protection settings
+                echo.
+                pause
+            ) else (
+                echo [SUCCESS] Pushed to 'main' branch successfully!
+            )
         ) else (
-            echo [SUCCESS] Also pushed to 'main' branch successfully!
+            echo [SUCCESS] Pushed to 'main' branch successfully!
         )
+        echo.
+        echo Verifying files exist on GitHub main branch...
+        timeout /t 3 /nobreak >nul
+        echo Please manually verify at: https://github.com/partner0010/freeshell/blob/main/package.json
     )
     
     echo.
