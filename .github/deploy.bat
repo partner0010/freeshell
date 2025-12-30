@@ -254,9 +254,12 @@ echo.
 echo [DEBUG] git push -u origin !CURRENT_BRANCH! --force-with-lease 실행 중...
 echo [주의] 이 작업은 몇 초에서 몇 분이 걸릴 수 있습니다...
 git push -u origin !CURRENT_BRANCH! --force-with-lease 2>&1
-echo [DEBUG] Git push 명령어 실행 완료
+echo.
+echo [DEBUG] Git push 명령어 실행 완료 - 조건문 확인 시작
 set MASTER_PUSH_SUCCESS=0
-if errorlevel 1 (
+set PUSH_EXIT_CODE=!ERRORLEVEL!
+echo [DEBUG] ERRORLEVEL 값: !PUSH_EXIT_CODE!
+if !PUSH_EXIT_CODE! NEQ 0 (
     echo [DEBUG] force-with-lease 푸시 실패
     echo.
     echo [WARNING] force-with-lease 실패
@@ -305,13 +308,14 @@ if errorlevel 1 (
         echo [DEBUG] 일반 푸시 성공
     )
 ) else (
-    echo [DEBUG] else 블록 진입 - push 성공
+    echo [DEBUG] else 블록 진입 시작
     set MASTER_PUSH_SUCCESS=1
     echo [OK] force-with-lease 푸시 성공!
     echo [DEBUG] force-with-lease 푸시 성공
     echo [DEBUG] else 블록 완료
 )
-echo [DEBUG] 조건문 완료 - MASTER_PUSH_SUCCESS: !MASTER_PUSH_SUCCESS!
+echo [DEBUG] 조건문 완료 확인
+echo [DEBUG] MASTER_PUSH_SUCCESS 값: !MASTER_PUSH_SUCCESS!
 echo [DEBUG] master 브랜치 푸시 완료
 echo [DEBUG] 브랜치 푸시 단계 완료
 echo.
