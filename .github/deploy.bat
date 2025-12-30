@@ -154,25 +154,50 @@ echo.
 REM 필수 파일 강제 추가
 echo 필수 파일 추가 중...
 git add -f package.json
+if errorlevel 1 (
+    echo [WARNING] package.json 추가 실패
+) else (
+    echo [OK] package.json 추가 완료
+)
 if exist "netlify.toml" (
     git add -f netlify.toml
+    if errorlevel 1 (
+        echo [WARNING] netlify.toml 추가 실패
+    ) else (
+        echo [OK] netlify.toml 추가 완료
+    )
 )
 
 REM 모든 변경사항 추가
+echo 모든 변경사항 추가 중...
 git add -A
+if errorlevel 1 (
+    echo [WARNING] git add 실패
+) else (
+    echo [OK] 파일 추가 완료
+)
+echo.
 
 REM 커밋 메시지 입력
 echo 커밋 메시지를 입력하세요 (Enter: 기본값 사용):
 set /p "COMMIT_MSG="
 if "!COMMIT_MSG!"=="" set "COMMIT_MSG=Shell updates and improvements"
+echo.
+echo 커밋 메시지: !COMMIT_MSG!
+echo.
 
 REM 커밋
+echo 커밋 중...
 git commit -m "!COMMIT_MSG!"
 if errorlevel 1 (
+    echo.
     echo [WARNING] 커밋 실패 또는 변경사항 없음
+    echo Git 상태 확인:
     git status --short
+    echo.
+    echo 변경사항이 없어도 계속 진행합니다...
 ) else (
-    echo 커밋 완료!
+    echo [OK] 커밋 완료!
 )
 echo.
 
@@ -181,17 +206,22 @@ echo.
 
 REM 원격 저장소 내용 가져오기 (먼저 시도)
 echo 원격 저장소 정보 가져오는 중...
-git fetch origin
+git fetch origin 2>&1 | findstr /V "fatal:" >nul
 if errorlevel 1 (
     echo [INFO] 원격 저장소를 가져올 수 없습니다 (첫 푸시일 수 있음)
     echo 이는 정상일 수 있습니다. 계속 진행합니다.
+) else (
+    echo [OK] 원격 저장소 정보 가져오기 완료
 )
 echo.
 
 REM 로컬 커밋이 있는지 확인
 git rev-parse --verify HEAD >nul 2>&1
 if errorlevel 1 (
-    echo [INFO] 아직 로컬 커밋이 없습니다. 첫 커밋을 진행합니다.
+    echo [ERROR] 로컬 커밋이 없습니다!
+    echo 커밋이 필요합니다. 다시 시도해주세요.
+    pause
+    exit /b 1
 ) else (
     echo [OK] 로컬 커밋 확인됨
 )
@@ -199,13 +229,16 @@ echo.
 
 REM master 브랜치로 푸시 (force-with-lease 사용)
 echo !CURRENT_BRANCH! 브랜치로 푸시 중...
-call git push -u origin !CURRENT_BRANCH! --force-with-lease
+call git push -u origin !CURRENT_BRANCH! --force-with-lease 2>&1
+set PUSH_ERROR=0
 if errorlevel 1 (
+    set PUSH_ERROR=1
     echo.
     echo [WARNING] force-with-lease 실패
     echo 일반 푸시를 시도합니다...
-    call git push -u origin !CURRENT_BRANCH!
+    call git push -u origin !CURRENT_BRANCH! 2>&1
     if errorlevel 1 (
+        set PUSH_ERROR=1
         echo.
         echo [WARNING] 일반 푸시도 실패했습니다
         echo [주의] 원격 저장소의 기존 내용을 덮어쓰기 위해 force push가 필요합니다.
@@ -215,7 +248,7 @@ if errorlevel 1 (
         if /i "!FORCE_CONFIRM!"=="Y" (
             echo.
             echo force push 실행 중...
-            call git push -u origin !CURRENT_BRANCH! --force
+            call git push -u origin !CURRENT_BRANCH! --force 2>&1
             if errorlevel 1 (
                 echo.
                 echo [ERROR] 푸시 실패!
@@ -229,6 +262,7 @@ if errorlevel 1 (
                 pause
                 exit /b 1
             ) else (
+                set PUSH_ERROR=0
                 echo [OK] force push 성공!
             )
         ) else (
@@ -238,9 +272,11 @@ if errorlevel 1 (
             exit /b 1
         )
     ) else (
+        set PUSH_ERROR=0
         echo [OK] 일반 푸시 성공!
     )
 ) else (
+    set PUSH_ERROR=0
     echo [OK] force-with-lease 푸시 성공!
 )
 echo.
@@ -249,21 +285,23 @@ REM master 브랜치인 경우 main 브랜치로도 푸시 (Netlify용)
 if /i "!CURRENT_BRANCH!"=="master" (
     echo.
     echo main 브랜치로도 푸시 중 (Netlify용)...
-    call git push origin master:main --force-with-lease
+    call git push origin master:main --force-with-lease 2>&1
     if errorlevel 1 (
         echo [WARNING] force-with-lease 실패
         echo 일반 push 시도 중...
-        call git push origin master:main
+        call git push origin master:main 2>&1
         if errorlevel 1 (
             echo [WARNING] 일반 push 실패
             echo force push 시도 중...
-            call git push origin master:main --force
+            call git push origin master:main --force 2>&1
             if errorlevel 1 (
                 echo.
                 echo [ERROR] main 브랜치 푸시 실패!
                 echo Netlify는 main 브랜치를 모니터링합니다.
                 echo 수동으로 푸시해야 할 수 있습니다.
+                echo 명령어: git push origin master:main --force
                 echo.
+                pause
             ) else (
                 echo [OK] main 브랜치 푸시 완료 (force)!
             )
