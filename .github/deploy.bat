@@ -59,7 +59,7 @@ REM Git 저장소 확인 및 초기화
 REM 현재 디렉토리에 .git 폴더가 있는지 확인
 if not exist ".git" (
     echo [INFO] Git 저장소가 없습니다. 초기화 중...
-    git init
+    git init -b master
     if errorlevel 1 (
         echo [ERROR] Git 초기화 실패
         pause
@@ -127,9 +127,18 @@ echo.
 REM 현재 브랜치 확인
 for /f "tokens=*" %%i in ('git rev-parse --abbrev-ref HEAD 2^>nul') do set "CURRENT_BRANCH=%%i"
 if "!CURRENT_BRANCH!"=="" (
-    git checkout -b master 2>nul
-    set "CURRENT_BRANCH=master"
+    REM 아직 커밋이 없는 경우
+    for /f "tokens=*" %%i in ('git branch --show-current 2^>nul') do set "CURRENT_BRANCH=%%i"
+    if "!CURRENT_BRANCH!"=="" (
+        REM master 브랜치 생성
+        git checkout -b master 2>nul
+        if errorlevel 1 (
+            git branch master 2>nul
+        )
+        set "CURRENT_BRANCH=master"
+    )
 )
+if "!CURRENT_BRANCH!"=="HEAD" set "CURRENT_BRANCH=master"
 
 echo 현재 브랜치: !CURRENT_BRANCH!
 echo.
@@ -162,38 +171,71 @@ echo.
 echo [4/4] GitHub로 푸시...
 echo.
 
-REM master 브랜치로 푸시
-echo !CURRENT_BRANCH! 브랜치로 푸시 중...
-call git push -u origin !CURRENT_BRANCH!
+REM 원격 저장소 내용 가져오기 (먼저 시도)
+echo 원격 저장소 정보 가져오는 중...
+git fetch origin 2>nul
 if errorlevel 1 (
-    echo [WARNING] 첫 푸시 실패, 일반 푸시 시도 중...
-    call git push origin !CURRENT_BRANCH!
+    echo [INFO] 원격 저장소를 가져올 수 없습니다 (첫 푸시일 수 있음)
+)
+
+REM 로컬 커밋이 있는지 확인
+git rev-parse --verify HEAD >nul 2>&1
+if errorlevel 1 (
+    echo [INFO] 아직 로컬 커밋이 없습니다. 첫 커밋을 진행합니다.
+)
+
+REM master 브랜치로 푸시 (force-with-lease 사용)
+echo !CURRENT_BRANCH! 브랜치로 푸시 중...
+call git push -u origin !CURRENT_BRANCH! --force-with-lease
+if errorlevel 1 (
+    echo [WARNING] force-with-lease 실패, 일반 푸시 시도 중...
+    call git push -u origin !CURRENT_BRANCH!
     if errorlevel 1 (
-        echo [ERROR] 푸시 실패!
-        echo.
-        echo 문제 해결:
-        echo 1. GitHub 인증 확인
-        echo 2. 저장소 권한 확인
-        echo 3. 브랜치 이름 확인: !CURRENT_BRANCH!
-        echo.
-        pause
-        exit /b 1
+        echo [WARNING] 첫 푸시 실패, force push 시도 중...
+        echo [주의] 원격 저장소의 기존 내용을 덮어씁니다.
+        echo 계속하시겠습니까? (Y/N)
+        set /p "FORCE_CONFIRM="
+        if /i "!FORCE_CONFIRM!"=="Y" (
+            call git push -u origin !CURRENT_BRANCH! --force
+            if errorlevel 1 (
+                echo [ERROR] 푸시 실패!
+                echo.
+                echo 문제 해결:
+                echo 1. GitHub 인증 확인
+                echo 2. 저장소 권한 확인
+                echo 3. 브랜치 이름 확인: !CURRENT_BRANCH!
+                echo.
+                pause
+                exit /b 1
+            )
+        ) else (
+            echo 푸시가 취소되었습니다.
+            pause
+            exit /b 1
+        )
     )
 )
 echo !CURRENT_BRANCH! 브랜치 푸시 완료!
 echo.
 
-REM master 브랜치인 경우 main 브랜치로도 푸시
+REM master 브랜치인 경우 main 브랜치로도 푸시 (Netlify용)
 if /i "!CURRENT_BRANCH!"=="master" (
+    echo.
     echo main 브랜치로도 푸시 중 (Netlify용)...
     call git push origin master:main --force-with-lease
     if errorlevel 1 (
-        echo [WARNING] force push 실패, 일반 push 시도 중...
+        echo [WARNING] force-with-lease 실패, 일반 push 시도 중...
         call git push origin master:main
         if errorlevel 1 (
-            echo [ERROR] main 브랜치 푸시 실패!
-            echo Netlify는 main 브랜치를 모니터링합니다.
-            echo.
+            echo [WARNING] 일반 push 실패, force push 시도 중...
+            call git push origin master:main --force
+            if errorlevel 1 (
+                echo [ERROR] main 브랜치 푸시 실패!
+                echo Netlify는 main 브랜치를 모니터링합니다.
+                echo.
+            ) else (
+                echo main 브랜치 푸시 완료 (force)!
+            )
         ) else (
             echo main 브랜치 푸시 완료!
         )
