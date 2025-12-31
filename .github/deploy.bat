@@ -138,13 +138,21 @@ REM .next 폴더 정리 (더 강력한 삭제)
 if exist ".next" (
     echo .next 폴더 삭제 중...
     echo [DEBUG] .next 폴더 삭제 시작 >> "!LOG_FILE!"
-    REM 여러 번 시도하여 완전히 삭제
+    REM PowerShell을 사용하여 더 강력하게 삭제
+    powershell -Command "if (Test-Path '.next') { Remove-Item -Path '.next' -Recurse -Force -ErrorAction SilentlyContinue }"
+    timeout /t 2 /nobreak >nul 2>&1
+    REM 배치 명령으로도 한 번 더 시도
     rmdir /s /q .next 2>nul
     timeout /t 1 /nobreak >nul 2>&1
+    REM 최종 확인 및 재시도
     if exist ".next" (
+        echo [DEBUG] .next 폴더 삭제 재시도 중... >> "!LOG_FILE!"
+        powershell -Command "Get-ChildItem -Path '.next' -Recurse | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue; if (Test-Path '.next') { Remove-Item -Path '.next' -Force -Recurse -ErrorAction SilentlyContinue }"
+        timeout /t 2 /nobreak >nul 2>&1
         rmdir /s /q .next 2>nul
         timeout /t 1 /nobreak >nul 2>&1
     )
+    REM 최종 확인
     if exist ".next" (
         echo [WARNING] .next 폴더 삭제 실패, 계속 진행합니다...
         echo [WARNING] .next 폴더 삭제 실패, 계속 진행합니다... >> "!LOG_FILE!"
@@ -160,11 +168,20 @@ call npm run build
 if errorlevel 1 (
     echo.
     echo [ERROR] 빌드 실패!
+    echo [ERROR] 빌드 실패! >> "!LOG_FILE!"
     echo.
-    pause
+    echo 빌드 실패 - .next 폴더를 완전히 삭제하고 다시 시도해주세요.
+    echo 빌드 실패 - .next 폴더를 완전히 삭제하고 다시 시도해주세요. >> "!LOG_FILE!"
+    echo.
+    echo 수동 삭제 명령어:
+    echo   rmdir /s /q .next
+    echo   또는 PowerShell: Remove-Item -Recurse -Force .next
+    echo.
+    timeout /t 10 /nobreak
     exit /b 1
 )
 echo 빌드 성공!
+echo 빌드 성공! >> "!LOG_FILE!"
 echo.
 
 echo [3/4] Git 커밋...
