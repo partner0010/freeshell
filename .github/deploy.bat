@@ -163,6 +163,13 @@ if exist ".next" (
 )
 
 echo 빌드 시작 (몇 분 소요될 수 있습니다)...
+echo 빌드 시작 (몇 분 소요될 수 있습니다)... >> "!LOG_FILE!"
+echo.
+echo [체크포인트] 빌드를 시작합니다. 계속하려면 엔터를 누르세요...
+echo [체크포인트] 빌드를 시작합니다. 계속하려면 엔터를 누르세요... >> "!LOG_FILE!"
+set /p "CHECKPOINT_INPUT="
+echo [사용자 확인] 엔터 입력 감지됨 - 빌드 시작 >> "!LOG_FILE!"
+echo.
 set NODE_OPTIONS=--max-old-space-size=4096
 call npm run build
 if errorlevel 1 (
@@ -182,6 +189,11 @@ if errorlevel 1 (
 )
 echo 빌드 성공!
 echo 빌드 성공! >> "!LOG_FILE!"
+echo.
+echo [체크포인트] 빌드가 완료되었습니다. Git 커밋을 시작합니다. 계속하려면 엔터를 누르세요...
+echo [체크포인트] 빌드가 완료되었습니다. Git 커밋을 시작합니다. 계속하려면 엔터를 누르세요... >> "!LOG_FILE!"
+set /p "CHECKPOINT_INPUT="
+echo [사용자 확인] 엔터 입력 감지됨 - Git 커밋 시작 >> "!LOG_FILE!"
 echo.
 
 echo [3/4] Git 커밋...
@@ -268,8 +280,15 @@ echo [DEBUG] Git 커밋 단계 완료
 echo.
 
 echo [4/4] GitHub로 푸시...
+echo [4/4] GitHub로 푸시... >> "!LOG_FILE!"
+echo.
+echo [체크포인트] GitHub로 푸시를 시작합니다. 계속하려면 엔터를 누르세요...
+echo [체크포인트] GitHub로 푸시를 시작합니다. 계속하려면 엔터를 누르세요... >> "!LOG_FILE!"
+set /p "CHECKPOINT_INPUT="
+echo [사용자 확인] 엔터 입력 감지됨 - GitHub 푸시 시작 >> "!LOG_FILE!"
 echo.
 echo [DEBUG] 단계 4 시작: GitHub 푸시 준비...
+echo [DEBUG] 단계 4 시작: GitHub 푸시 준비... >> "!LOG_FILE!"
 echo.
 
 REM 원격 저장소 내용 가져오기 (먼저 시도)
@@ -301,51 +320,80 @@ echo.
 
 REM master 브랜치로 푸시 (force-with-lease 사용)
 echo [DEBUG] 단계 4-3: 브랜치 푸시 시작 (!CURRENT_BRANCH!)...
+echo [DEBUG] 단계 4-3: 브랜치 푸시 시작 (!CURRENT_BRANCH!)... >> "!LOG_FILE!"
 echo !CURRENT_BRANCH! 브랜치로 푸시 중...
-echo [DEBUG] 원격 저장소 확인 중...
+echo !CURRENT_BRANCH! 브랜치로 푸시 중... >> "!LOG_FILE!"
+echo [DEBUG] 원격 저장소 확인 중... >> "!LOG_FILE!"
+git remote -v >> "!LOG_FILE!" 2>&1
 git remote -v
-echo [DEBUG] 원격 저장소 확인 완료
+echo [DEBUG] 원격 저장소 확인 완료 >> "!LOG_FILE!"
 echo.
-echo [DEBUG] git push -u origin !CURRENT_BRANCH! --force-with-lease 실행 중...
+echo [DEBUG] git push -u origin !CURRENT_BRANCH! --force-with-lease 실행 중... >> "!LOG_FILE!"
 echo [주의] 이 작업은 몇 초에서 몇 분이 걸릴 수 있습니다...
-call git push -u origin !CURRENT_BRANCH! --force-with-lease 2>&1
+echo [주의] 이 작업은 몇 초에서 몇 분이 걸릴 수 있습니다... >> "!LOG_FILE!"
+call git push -u origin !CURRENT_BRANCH! --force-with-lease >> "!LOG_FILE!" 2>&1
+call git push -u origin !CURRENT_BRANCH! --force-with-lease
 set PUSH_EXIT_CODE=!ERRORLEVEL!
 echo.
+echo [DEBUG] ======================================== >> "!LOG_FILE!"
+echo [DEBUG] Git push 명령어 실행 완료 >> "!LOG_FILE!"
+echo [DEBUG] ERRORLEVEL 값: !PUSH_EXIT_CODE! >> "!LOG_FILE!"
+echo [DEBUG] ======================================== >> "!LOG_FILE!"
 echo [DEBUG] ========================================
 echo [DEBUG] Git push 명령어 실행 완료
 echo [DEBUG] ERRORLEVEL 값: !PUSH_EXIT_CODE!
 echo [DEBUG] ========================================
 set MASTER_PUSH_SUCCESS=0
-echo [DEBUG] 조건문 확인 시작...
+echo [DEBUG] 조건문 확인 시작... >> "!LOG_FILE!"
 if !PUSH_EXIT_CODE! NEQ 0 (
+    echo [DEBUG] if 블록 진입 - 에러 발생 >> "!LOG_FILE!"
+    echo [DEBUG] force-with-lease 푸시 실패 >> "!LOG_FILE!"
     echo [DEBUG] if 블록 진입 - 에러 발생
     echo [DEBUG] force-with-lease 푸시 실패
     echo.
     echo [WARNING] force-with-lease 실패
-    echo [DEBUG] 일반 푸시 시도 시작...
+    echo [WARNING] force-with-lease 실패 >> "!LOG_FILE!"
+    echo [DEBUG] 일반 푸시 시도 시작... >> "!LOG_FILE!"
     echo 일반 푸시를 시도합니다...
-    call git push -u origin !CURRENT_BRANCH! 2>&1
+    echo 일반 푸시를 시도합니다... >> "!LOG_FILE!"
+    call git push -u origin !CURRENT_BRANCH! >> "!LOG_FILE!" 2>&1
+    call git push -u origin !CURRENT_BRANCH!
     set PUSH_EXIT_CODE=!ERRORLEVEL!
     echo.
+    echo [DEBUG] ======================================== >> "!LOG_FILE!"
+    echo [DEBUG] 일반 푸시 실행 완료 >> "!LOG_FILE!"
+    echo [DEBUG] ERRORLEVEL 값: !PUSH_EXIT_CODE! >> "!LOG_FILE!"
+    echo [DEBUG] ======================================== >> "!LOG_FILE!"
     echo [DEBUG] ========================================
     echo [DEBUG] 일반 푸시 실행 완료
     echo [DEBUG] ERRORLEVEL 값: !PUSH_EXIT_CODE!
     echo [DEBUG] ========================================
     if !PUSH_EXIT_CODE! NEQ 0 (
+        echo [DEBUG] 일반 푸시도 실패 >> "!LOG_FILE!"
         echo [DEBUG] 일반 푸시도 실패
         echo.
         echo [WARNING] 일반 푸시도 실패했습니다
+        echo [WARNING] 일반 푸시도 실패했습니다 >> "!LOG_FILE!"
         echo [주의] 원격 저장소의 기존 내용을 덮어쓰기 위해 force push가 필요합니다.
+        echo [주의] 원격 저장소의 기존 내용을 덮어쓰기 위해 force push가 필요합니다. >> "!LOG_FILE!"
         echo.
         echo 계속하시겠습니까? (Y/N)
+        echo 계속하시겠습니까? (Y/N) >> "!LOG_FILE!"
         set /p "FORCE_CONFIRM="
+        echo 사용자 입력: !FORCE_CONFIRM! >> "!LOG_FILE!"
         if /i "!FORCE_CONFIRM!"=="Y" (
             echo.
-            echo [DEBUG] force push 실행 시작...
+            echo [DEBUG] force push 실행 시작... >> "!LOG_FILE!"
             echo force push 실행 중...
-            call git push -u origin !CURRENT_BRANCH! --force 2>&1
+            echo force push 실행 중... >> "!LOG_FILE!"
+            call git push -u origin !CURRENT_BRANCH! --force >> "!LOG_FILE!" 2>&1
+            call git push -u origin !CURRENT_BRANCH! --force
             set PUSH_EXIT_CODE=!ERRORLEVEL!
             echo.
+            echo [DEBUG] ======================================== >> "!LOG_FILE!"
+            echo [DEBUG] force push 실행 완료 >> "!LOG_FILE!"
+            echo [DEBUG] ERRORLEVEL 값: !PUSH_EXIT_CODE! >> "!LOG_FILE!"
+            echo [DEBUG] ======================================== >> "!LOG_FILE!"
             echo [DEBUG] ========================================
             echo [DEBUG] force push 실행 완료
             echo [DEBUG] ERRORLEVEL 값: !PUSH_EXIT_CODE!
@@ -353,38 +401,53 @@ if !PUSH_EXIT_CODE! NEQ 0 (
             if !PUSH_EXIT_CODE! NEQ 0 (
                 echo.
                 echo [ERROR] 푸시 실패!
+                echo [ERROR] 푸시 실패! >> "!LOG_FILE!"
                 echo.
                 echo 문제 해결:
                 echo 1. GitHub 인증 확인
                 echo 2. 저장소 권한 확인
                 echo 3. 브랜치 이름 확인: !CURRENT_BRANCH!
                 echo 4. 네트워크 연결 확인
+                echo 문제 해결: >> "!LOG_FILE!"
+                echo 1. GitHub 인증 확인 >> "!LOG_FILE!"
+                echo 2. 저장소 권한 확인 >> "!LOG_FILE!"
+                echo 3. 브랜치 이름 확인: !CURRENT_BRANCH! >> "!LOG_FILE!"
+                echo 4. 네트워크 연결 확인 >> "!LOG_FILE!"
                 echo.
-                echo [DEBUG] 에러가 발생했지만 계속 진행합니다...
-                pause
+                echo [DEBUG] 에러가 발생했지만 계속 진행합니다... >> "!LOG_FILE!"
+                timeout /t 10 /nobreak >nul 2>&1
             ) else (
                 set MASTER_PUSH_SUCCESS=1
                 echo [OK] force push 성공!
-                echo [DEBUG] force push 성공
+                echo [OK] force push 성공! >> "!LOG_FILE!"
+                echo [DEBUG] force push 성공 >> "!LOG_FILE!"
             )
         ) else (
             echo.
             echo 푸시가 취소되었습니다.
-            pause
+            echo 푸시가 취소되었습니다. >> "!LOG_FILE!"
+            timeout /t 5 /nobreak >nul 2>&1
             exit /b 1
         )
     ) else (
         set MASTER_PUSH_SUCCESS=1
         echo [OK] 일반 푸시 성공!
-        echo [DEBUG] 일반 푸시 성공
+        echo [OK] 일반 푸시 성공! >> "!LOG_FILE!"
+        echo [DEBUG] 일반 푸시 성공 >> "!LOG_FILE!"
     )
 ) else (
-    echo [DEBUG] else 블록 진입 시작 - 성공
+    echo [DEBUG] else 블록 진입 시작 - 성공 >> "!LOG_FILE!"
     set MASTER_PUSH_SUCCESS=1
     echo [OK] force-with-lease 푸시 성공!
-    echo [DEBUG] force-with-lease 푸시 성공
-    echo [DEBUG] else 블록 완료
+    echo [OK] force-with-lease 푸시 성공! >> "!LOG_FILE!"
+    echo [DEBUG] force-with-lease 푸시 성공 >> "!LOG_FILE!"
+    echo [DEBUG] else 블록 완료 >> "!LOG_FILE!"
 )
+echo [DEBUG] 조건문 완료 확인 - 여기까지 도달 >> "!LOG_FILE!"
+echo [DEBUG] MASTER_PUSH_SUCCESS 값: !MASTER_PUSH_SUCCESS! >> "!LOG_FILE!"
+echo [DEBUG] master 브랜치 푸시 완료 >> "!LOG_FILE!"
+echo [DEBUG] 브랜치 푸시 단계 완료 >> "!LOG_FILE!"
+echo [DEBUG] 4-3 단계 완료 확인 >> "!LOG_FILE!"
 echo [DEBUG] 조건문 완료 확인 - 여기까지 도달
 echo [DEBUG] MASTER_PUSH_SUCCESS 값: !MASTER_PUSH_SUCCESS!
 echo [DEBUG] master 브랜치 푸시 완료
@@ -394,7 +457,13 @@ echo.
 echo ========================================
 echo [OK] 4-3 단계 완료 - master 브랜치 푸시 성공
 echo ========================================
+echo ======================================== >> "!LOG_FILE!"
+echo [OK] 4-3 단계 완료 - master 브랜치 푸시 성공 >> "!LOG_FILE!"
+echo ======================================== >> "!LOG_FILE!"
 echo.
+echo [DEBUG] 4-4 단계로 이동 전 확인... >> "!LOG_FILE!"
+echo [DEBUG] 현재 브랜치 변수 값: "!CURRENT_BRANCH!" >> "!LOG_FILE!"
+echo [DEBUG] 4-4 단계 조건 확인 시작... >> "!LOG_FILE!"
 echo [DEBUG] 4-4 단계로 이동 전 확인...
 echo [DEBUG] 현재 브랜치 변수 값: "!CURRENT_BRANCH!"
 echo [DEBUG] 4-4 단계 조건 확인 시작...
@@ -405,75 +474,111 @@ echo [DEBUG] Netlify는 main 브랜치를 모니터링하므로 main 브랜치�
 echo.
 echo [DEBUG] master 브랜치 조건 확인 중...
 if /i "!CURRENT_BRANCH!"=="master" (
+    echo.
+    echo [체크포인트] master 브랜치 푸시 완료. main 브랜치로도 푸시합니다. 계속하려면 엔터를 누르세요...
+    echo [체크포인트] master 브랜치 푸시 완료. main 브랜치로도 푸시합니다. 계속하려면 엔터를 누르세요... >> "!LOG_FILE!"
+    set /p "CHECKPOINT_INPUT="
+    echo [사용자 확인] 엔터 입력 감지됨 - main 브랜치 푸시 시작 >> "!LOG_FILE!"
+    echo.
     echo [DEBUG] master 브랜치 조건 만족 - 4-4 단계 시작
     echo [DEBUG] master 브랜치 확인됨 - main 브랜치로 푸시 시작
     echo [DEBUG] 4-4 단계 시작 - master 브랜치 확인됨
     echo.
     echo [DEBUG] 단계 4-4: main 브랜치로 푸시 시작 (Netlify용)...
+    echo [DEBUG] 단계 4-4: main 브랜치로 푸시 시작 (Netlify용)... >> "!LOG_FILE!"
     echo main 브랜치로도 푸시 중 (Netlify용)...
-    echo [DEBUG] 원격 저장소 확인 시작...
-    git remote -v >nul 2>&1
+    echo main 브랜치로도 푸시 중 (Netlify용)... >> "!LOG_FILE!"
+    echo [DEBUG] 원격 저장소 확인 시작... >> "!LOG_FILE!"
+    git remote -v >> "!LOG_FILE!" 2>&1
+    git remote -v
     if errorlevel 1 (
         echo [WARNING] git remote -v 실행 실패
+        echo [WARNING] git remote -v 실행 실패 >> "!LOG_FILE!"
     ) else (
-        git remote -v
         echo [DEBUG] 원격 저장소 확인 완료
+        echo [DEBUG] 원격 저장소 확인 완료 >> "!LOG_FILE!"
     )
     echo.
     echo [DEBUG] git push origin master:main --force-with-lease 실행 중...
+    echo [DEBUG] git push origin master:main --force-with-lease 실행 중... >> "!LOG_FILE!"
     echo [주의] 이 작업은 몇 초에서 몇 분이 걸릴 수 있습니다...
-    call git push origin master:main --force-with-lease 2>&1
+    echo [주의] 이 작업은 몇 초에서 몇 분이 걸릴 수 있습니다... >> "!LOG_FILE!"
+    call git push origin master:main --force-with-lease >> "!LOG_FILE!" 2>&1
+    call git push origin master:main --force-with-lease
     set MAIN_PUSH_EXIT=!ERRORLEVEL!
     echo.
     echo [DEBUG] main 브랜치 push ERRORLEVEL: !MAIN_PUSH_EXIT!
+    echo [DEBUG] main 브랜치 push ERRORLEVEL: !MAIN_PUSH_EXIT! >> "!LOG_FILE!"
     if !MAIN_PUSH_EXIT! NEQ 0 (
         echo.
         echo [WARNING] force-with-lease 실패
-        echo [DEBUG] 일반 push 시도 시작...
+        echo [WARNING] force-with-lease 실패 >> "!LOG_FILE!"
+        echo [DEBUG] 일반 push 시도 시작... >> "!LOG_FILE!"
         echo 일반 push 시도 중...
-        call git push origin master:main 2>&1
+        echo 일반 push 시도 중... >> "!LOG_FILE!"
+        call git push origin master:main >> "!LOG_FILE!" 2>&1
+        call git push origin master:main
         set MAIN_PUSH_EXIT=!ERRORLEVEL!
         echo [DEBUG] 일반 push ERRORLEVEL: !MAIN_PUSH_EXIT!
+        echo [DEBUG] 일반 push ERRORLEVEL: !MAIN_PUSH_EXIT! >> "!LOG_FILE!"
         if !MAIN_PUSH_EXIT! NEQ 0 (
             echo.
             echo [WARNING] 일반 push 실패
-            echo [DEBUG] force push 시도 시작...
+            echo [WARNING] 일반 push 실패 >> "!LOG_FILE!"
+            echo [DEBUG] force push 시도 시작... >> "!LOG_FILE!"
             echo force push 시도 중...
-            call git push origin master:main --force 2>&1
+            echo force push 시도 중... >> "!LOG_FILE!"
+            call git push origin master:main --force >> "!LOG_FILE!" 2>&1
+            call git push origin master:main --force
             set MAIN_PUSH_EXIT=!ERRORLEVEL!
             echo [DEBUG] force push ERRORLEVEL: !MAIN_PUSH_EXIT!
+            echo [DEBUG] force push ERRORLEVEL: !MAIN_PUSH_EXIT! >> "!LOG_FILE!"
             if !MAIN_PUSH_EXIT! NEQ 0 (
                 echo.
                 echo [ERROR] main 브랜치 푸시 실패!
+                echo [ERROR] main 브랜치 푸시 실패! >> "!LOG_FILE!"
                 echo Netlify는 main 브랜치를 모니터링합니다.
+                echo Netlify는 main 브랜치를 모니터링합니다. >> "!LOG_FILE!"
                 echo 수동으로 푸시해야 할 수 있습니다.
+                echo 수동으로 푸시해야 할 수 있습니다. >> "!LOG_FILE!"
                 echo 명령어: git push origin master:main --force
+                echo 명령어: git push origin master:main --force >> "!LOG_FILE!"
                 echo.
-                echo [DEBUG] 에러가 발생했지만 계속 진행합니다...
-                pause
+                echo [DEBUG] 에러가 발생했지만 계속 진행합니다... >> "!LOG_FILE!"
+                timeout /t 10 /nobreak >nul 2>&1
             ) else (
                 echo [OK] main 브랜치 푸시 완료 (force)!
-                echo [DEBUG] force push 성공
+                echo [OK] main 브랜치 푸시 완료 (force)! >> "!LOG_FILE!"
+                echo [DEBUG] force push 성공 >> "!LOG_FILE!"
             )
         ) else (
             echo [OK] main 브랜치 푸시 완료!
-            echo [DEBUG] 일반 push 성공
+            echo [OK] main 브랜치 푸시 완료! >> "!LOG_FILE!"
+            echo [DEBUG] 일반 push 성공 >> "!LOG_FILE!"
         )
     ) else (
         echo [OK] main 브랜치 푸시 완료!
-        echo [DEBUG] force-with-lease push 성공
+        echo [OK] main 브랜치 푸시 완료! >> "!LOG_FILE!"
+        echo [DEBUG] force-with-lease push 성공 >> "!LOG_FILE!"
     )
+    echo [DEBUG] main 브랜치 푸시 단계 완료 >> "!LOG_FILE!"
     echo [DEBUG] main 브랜치 푸시 단계 완료
     echo.
     echo ========================================
     echo [OK] 4-4 단계 완료 - main 브랜치 푸시 성공
     echo ========================================
+    echo ======================================== >> "!LOG_FILE!"
+    echo [OK] 4-4 단계 완료 - main 브랜치 푸시 성공 >> "!LOG_FILE!"
+    echo ======================================== >> "!LOG_FILE!"
     echo.
 ) else (
+    echo [DEBUG] 현재 브랜치가 master가 아니므로 main 브랜치 푸시를 건너뜁니다. >> "!LOG_FILE!"
+    echo [DEBUG] 현재 브랜치: "!CURRENT_BRANCH!" >> "!LOG_FILE!"
     echo [DEBUG] 현재 브랜치가 master가 아니므로 main 브랜치 푸시를 건너뜁니다.
     echo [DEBUG] 현재 브랜치: "!CURRENT_BRANCH!"
     echo.
 )
+echo [DEBUG] 4-4 단계 처리 완료 >> "!LOG_FILE!"
 echo [DEBUG] 4-4 단계 처리 완료
 echo.
 
@@ -508,5 +613,13 @@ echo.
 echo ========================================
 echo.
 echo [DEBUG] 배치 파일 종료 전 마지막 확인 지점입니다.
-echo 아무 키나 누르면 종료됩니다...
-pause
+echo [DEBUG] 배치 파일 종료 전 마지막 확인 지점입니다. >> "!LOG_FILE!"
+echo.
+echo [체크포인트] 모든 작업이 완료되었습니다. 로그를 확인하려면 deploy.log 파일을 열어보세요.
+echo [체크포인트] 모든 작업이 완료되었습니다. 로그를 확인하려면 deploy.log 파일을 열어보세요. >> "!LOG_FILE!"
+echo.
+echo 종료하려면 엔터를 누르세요...
+echo 종료하려면 엔터를 누르세요... >> "!LOG_FILE!"
+set /p "CHECKPOINT_INPUT="
+echo [사용자 확인] 엔터 입력 감지됨 - 배포 스크립트 종료 >> "!LOG_FILE!"
+echo [DEBUG] 배치 파일 정상 종료 >> "!LOG_FILE!"
